@@ -25,7 +25,7 @@ public class ServerBoard {
         this.unitsLeft = unitsLeft;
     }
 
-    private void initializeBoard() {
+    public void initializeBoard() {
         if (this.board == null) {
             this.board = new ServerCell[boardsize][boardsize];
         }
@@ -34,6 +34,7 @@ public class ServerBoard {
                 board[i][j] = new ServerCell();
             }
         }
+        this.unitsLeft = 10;
     }
 
     public ServerCell getCell(int x,int y){
@@ -147,7 +148,11 @@ public class ServerBoard {
         return getCell(x,y).shoot();
     }
 
-    public boolean destroyShip(int x, int y){
+    public boolean checkIfMissed(int x,int y) {
+        return getCell(x,y).isShip();
+    }
+
+    public boolean destroyShip(){
         this.unitsLeft--;
         return this.unitsLeft > 0;
     }

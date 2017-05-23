@@ -1,0 +1,33 @@
+package main.Utils;
+
+/**
+ * Created by Jakub on 2017-05-23.
+ */
+public enum Command {
+    LOGIN,
+    LOGIN_SUCCEED,
+    NAME_NOT_AVAILABLE,
+    CREATE_GAME,
+    JOIN_TO_GAME,
+    WAIT_FOR_OPPONENT,
+    OPPONENT_JOINED,
+    OPPONENT_EXIT,
+    OPPONENT_MISSED,
+    OPPONENT_HIT,
+    OPPONENT_HIT_AND_SINK,
+    YOU_WIN,
+    YOU_LOSE,
+    JOINED,
+    JOIN_TO_GAME_FAILED,
+    PLACE_YOUR_SHIPS,
+    PLACE_A_SHIP,
+    PLACEMENT_SUCCEED,
+    PLACEMENT_FAILED,
+    YOUR_TURN,
+    NOT_YOUR_TURN,
+    SHOOT_AGAIN,
+    SHOOT,
+    MISSED,
+    HIT,
+    HIT_AND_SINK
+}

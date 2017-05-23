@@ -70,7 +70,7 @@ public class Server extends Thread {
         return this.createdGames;
     }
 
-    public boolean checkNameAvailability(String name) {
+    public synchronized boolean checkNameAvailability(String name) {
         boolean available = true;
         synchronized (instance.userNames) {
             if (instance.userNames.contains(name)) {
@@ -83,5 +83,11 @@ public class Server extends Thread {
     public synchronized int getNextGameID() {
         gameID++;
         return gameID - 1;
+    }
+
+    private void sendBroadcast(String message){
+        for (Game game: instance.createdGames) {
+            game.sendToBothPlayers(message);
+        }
     }
 }

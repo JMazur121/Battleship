@@ -18,6 +18,12 @@ public class ServerCell {
         return this.wasHit;
     }
 
+    boolean isShip() {
+        if(this.ship == null)
+            return false;
+        return true;
+    }
+
     public Ship getShip() {
         return ship;
     }
