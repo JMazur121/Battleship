@@ -7,11 +7,14 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 /**
  * FXML Controller class
@@ -46,15 +49,41 @@ public class ClientViewController implements Initializable {
     private TextField chatField;
     @FXML
     private Button sendButton;
+    @FXML
+    private BorderPane borderPane;
 
-    /**
-     * Initializes the controller class.
-     * @param url
-     * @param rb
-     */
+    private Board myBoard;
+    private Board enemyBoard;
+
+    private boolean shipPlacement = false;
+    private boolean shooting = false;
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        myBoard = new Board(event -> {
+            if(!shipPlacement && !shooting)
+                return;
+            ClientCell cell = (ClientCell)event.getSource();
+            cell.setFill(Color.GOLD);//for test
+        });
+        enemyBoard = new Board(event -> {});
+        HBox hbox = new HBox();
+        VBox my = new VBox();
+        VBox enemy = new VBox();
+        my.getChildren().add(myBoard);
+        Label mylabel = new Label();
+        mylabel.setText("Plansza gracza");
+        mylabel.setAlignment(Pos.CENTER);
+        Label enemyLabel = new Label();
+        enemyLabel.setText("Plansza przeciwnika");
+        enemyLabel.setAlignment(Pos.CENTER);
+        my.getChildren().add(mylabel);
+        enemy.getChildren().add(enemyBoard);
+        enemy.getChildren().add(enemyLabel);
+        hbox.setSpacing(10);
+        hbox.getChildren().add(my);
+        hbox.getChildren().add(enemy);
+        borderPane.setTop(hbox);
     }
 
 }

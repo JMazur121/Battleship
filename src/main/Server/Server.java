@@ -24,7 +24,6 @@ public class Server extends Thread {
             listener = new ServerSocket(port);
             while (true){
                 Player newPlayer = new Player(listener.accept());
-                System.out.println("Server is running...");
                 newPlayer.start();
             }
         } catch (IOException e) {

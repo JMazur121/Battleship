@@ -39,6 +39,13 @@ public class Player extends Thread {
                         userName = tmp[1];
                         out.println(Command.LOGIN_SUCCEED.toString());
                         isConnected = true;
+
+                        //send available games
+                        for (Game game: Server.getInstance().getGames()) {
+                                String info = Command.AVAILABLE_GAME.toString();
+                                info = info + "#" + game.getInfo();
+                                out.println(info);
+                        }
                     }
                     else {
                         out.println(Command.NAME_NOT_AVAILABLE.toString());
@@ -51,13 +58,30 @@ public class Player extends Thread {
                     out.println(Command.WAIT_FOR_OPPONENT.toString());
                 }
 
+                else if(command.equals("DELETE_GAME")){
+                    if(this == this.game.getHost()){
+                        Player guest = this.game.getGuest();
+                        if(guest != null){
+                            guest.sendToPlayer(Command.HOST_DELETED_THIS_GAME.toString());
+                            guest.resetPlayer();
+                            Server.getInstance().deleteGame(this.game);
+                        }
+                        this.resetPlayer();
+                    }
+                }
+
                 else if(command.equals("JOIN_TO_GAME")){
                     resetPlayer();
                     int index = Integer.parseInt(tmp[1]);
                     Game toJoin = Server.getInstance().findGame(index);
                     if(toJoin != null){
-                        toJoin.addPlayer(this);
-                        this.game = toJoin;
+                        if(toJoin.hasTwoPlayers()){
+                            out.println(Command.GAME_HAS_ALREADY_2_PLAYERS.toString());
+                        }
+                        else {
+                            toJoin.addPlayer(this);
+                            this.game = toJoin;
+                        }
                     }
                     else {
                         out.println(Command.JOIN_TO_GAME_FAILED.toString());
@@ -65,22 +89,31 @@ public class Player extends Thread {
                 }
 
                 else if(command.equals("PLACE_A_SHIP")){
-                    boolean vertical = Boolean.parseBoolean(tmp[1]);
-                    int x = Integer.parseInt(tmp[2]);
-                    int y = Integer.parseInt(tmp[3]);
-                    int length = Integer.parseInt(tmp[4]);
-                    this.game.placeShip(this,new Ship(length,vertical),x,y);
+                    try {
+                        boolean vertical = Boolean.parseBoolean(tmp[1]);
+                        int x = Integer.parseInt(tmp[2]);
+                        int y = Integer.parseInt(tmp[3]);
+                        int length = Integer.parseInt(tmp[4]);
+                        this.game.placeShip(this, x, y, length,vertical);
+                    } catch (NumberFormatException e){
+                        e.printStackTrace();
+                    }
                 }
 
                 else if(command.equals("SHOOT")){
-                    int x = Integer.parseInt(tmp[1]);
-                    int y = Integer.parseInt(tmp[2]);
-                    this.game.shoot(this,x,y);
+                    try {
+                        int x = Integer.parseInt(tmp[1]);
+                        int y = Integer.parseInt(tmp[2]);
+                        this.game.shoot(this, x, y);
+                    } catch (NumberFormatException e){
+                        e.printStackTrace();
+                    }
                 }
 
             }
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
         }
     }
 

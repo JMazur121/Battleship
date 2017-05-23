@@ -26,7 +26,7 @@ public class Game {
         Server.getInstance().addGame(this);
     }
 
-    public void changePlayer() {
+    private void changePlayer() {
         if (currentPlayer.equals(host))
             currentPlayer = guest;
         else
@@ -48,8 +48,14 @@ public class Game {
         return this.host;
     }
 
+    public Player getGuest() {return this.guest;}
+
     public int getGameID() {
         return this.gameID;
+    }
+
+    public String getInfo() {
+        return Integer.toString(this.getGameID()) + "#" + this.getHost().getUserName();
     }
 
     public void sendToBothPlayers(String message){
@@ -100,11 +106,26 @@ public class Game {
         this.isGameActive = false;
     }
 
-    synchronized public void placeShip(Player player, Ship toPlace,int x,int y){
+    synchronized public void setReady(Player player){
+        if(player == this.host)
+            this.hostReady = true;
+        else
+            this.guestReady = true;
+
+        if(this.guestReady && this.hostReady){
+            player.sendToPlayer(Command.OPPONENT_IS_READY.toString());
+            this.getOpponent(player).sendToPlayer(Command.OPPONENT_IS_READY.toString());
+        }
+    }
+
+    synchronized public void placeShip(Player player,int x,int y,int length,boolean orientation){
+        Ship toPlace = new Ship(length,orientation);
         if(this.host == player) {
             if(this.hostBoard.placeShip(toPlace, x, y)) {//placement ok
                 this.hostShipsToPlace--;
                 player.sendToPlayer(Command.PLACEMENT_SUCCEED.toString());
+                if(this.hostShipsToPlace == 0)
+                    player.sendToPlayer(Command.ALL_SHIPS_PLACED.toString());
             }
             else{
                 player.sendToPlayer(Command.PLACEMENT_FAILED.toString());
@@ -114,6 +135,8 @@ public class Game {
             if(this.guestBoard.placeShip(toPlace, x, y)){
                 this.guestShipsToPlace--;
                 player.sendToPlayer(Command.PLACEMENT_SUCCEED.toString());
+                if(this.guestShipsToPlace == 0)
+                    player.sendToPlayer(Command.ALL_SHIPS_PLACED.toString());
             }
             else{
                 player.sendToPlayer(Command.PLACEMENT_FAILED.toString());

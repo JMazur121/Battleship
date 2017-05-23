@@ -8,12 +8,11 @@ import main.Utils.Point;
  * Created by Jakub on 2017-05-20.
  */
 public class ClientCell extends Rectangle {
-    private final int cellSize = 30;
     private final Point position;
     private boolean wasUsed = false;
 
     public ClientCell(int x, int y){
-        super(x,y);
+        super(30,30);
         position = new Point(x,y);
         this.setFill(Color.DODGERBLUE);
         this.setStroke(Color.BLACK);
