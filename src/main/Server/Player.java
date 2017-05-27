@@ -22,6 +22,7 @@ public class Player extends Thread {
     public Player(Socket socket) {
         this.socket = socket;
         System.out.println("Player connected...");
+        isConnected = true;
     }
 
     public void run(){

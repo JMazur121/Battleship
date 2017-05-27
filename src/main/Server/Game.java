@@ -70,6 +70,7 @@ public class Game {
         this.guestShipsToPlace = 10;
         this.hostReady = false;
         this.guestReady = false;
+        this.isGameActive = false;
     }
 
     public boolean hasTwoPlayers() {

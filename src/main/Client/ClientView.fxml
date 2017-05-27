@@ -45,7 +45,7 @@
                         <Font size="14.0" />
                      </font>
                   </Button>
-                  <Button fx:id="exitButton" mnemonicParsing="false" prefHeight="6.0" prefWidth="86.0" text="Zakończ">
+                  <Button fx:id="exitButton" mnemonicParsing="false" prefHeight="6.0" prefWidth="86.0" text="Opuść grę">
                      <font>
                         <Font size="14.0" />
                      </font>

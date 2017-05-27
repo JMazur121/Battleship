@@ -98,4 +98,8 @@ public class Board extends Parent {
                 getCell(tempx,y).setColorAndUsed(Color.BEIGE);
         }
     }
+
+    public void destroyShip(){
+        this.shipsLeft--;
+    }
 }

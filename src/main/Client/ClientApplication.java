@@ -19,10 +19,9 @@ public class ClientApplication extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("ClientView.fxml"));
-        primaryStage.setTitle("Okręty");
+        Parent root = FXMLLoader.load(getClass().getResource("LoginWindow.fxml"));
+        primaryStage.setTitle("Zaloguj");
         primaryStage.setScene(new Scene(root));
-        primaryStage.setResizable(false);
         primaryStage.show();
     }
 }
