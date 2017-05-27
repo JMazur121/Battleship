@@ -24,7 +24,7 @@
                   <HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="221.0">
                      <children>
                         <TextField fx:id="nickField" prefHeight="39.0" prefWidth="180.0" />
-                        <Button fx:id="loginButton" mnemonicParsing="false" prefHeight="38.0" prefWidth="70.0" text="Zaloguj" />
+                        <Button fx:id="loginButton" mnemonicParsing="false" onAction="#logIn" prefHeight="38.0" prefWidth="70.0" text="Zaloguj" />
                      </children>
                   </HBox>
                   <Label text="Twoja gra" />

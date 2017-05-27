@@ -19,6 +19,10 @@ public class Board extends Parent {
     private VBox rows = new VBox();
     private int shipsLeft = 10;
     private static final int boardsize = 10;
+    private int currentPlacingSize = 4;
+    private int currentSizeToPlace = 1;
+    private boolean isCurrentVertical = true;
+    private ClientCell currentCell;
 
     public Board(EventHandler<? super MouseEvent> mouseClickHandler) {
         for (int y = 0; y < boardsize; y++) {
@@ -37,6 +41,16 @@ public class Board extends Parent {
         return (ClientCell)((HBox)rows.getChildren().get(y)).getChildren().get(x);
     }
 
+    public void setCurrentCell(ClientCell currentCell) {
+        this.currentCell = currentCell;
+    }
+
+    public void setCurrentVertical(boolean currentVertical) {
+        isCurrentVertical = currentVertical;
+    }
+
+    public int getCurrentPlacingSize(){return this.currentPlacingSize;}
+
     public void repaintOnHit(int x, int y){
         ClientCell cell = getCell(x,y);
         cell.setColorAndUsed(Color.RED);
@@ -45,6 +59,32 @@ public class Board extends Parent {
     public void repaintOnMissed(int x, int y){
         ClientCell cell = getCell(x,y);
         cell.setColorAndUsed(Color.CHOCOLATE);
+    }
+
+    public boolean placeCurrentShip(){
+            if(this.isCurrentVertical){ //== vertical
+                for(int i=this.currentCell.getYCoordinate(); i<this.currentCell.getYCoordinate()+this.currentPlacingSize; i++){
+                    getCell(this.currentCell.getXCoordinate(),i).setColorAndUsed(Color.BURLYWOOD);
+                }
+                this.shipsLeft--;
+                this.currentSizeToPlace--;
+                if(this.currentSizeToPlace == 0){
+                    this.currentPlacingSize--;
+                    this.currentSizeToPlace = 5 - this.currentPlacingSize;
+                }
+            }
+            else { //horizontal
+                for (int i = this.currentCell.getXCoordinate(); i < this.currentCell.getXCoordinate()+this.currentPlacingSize; i++) {
+                    getCell(i, this.currentCell.getYCoordinate()).setColorAndUsed(Color.BURLYWOOD);
+                }
+                this.shipsLeft--;
+                this.currentSizeToPlace--;
+                if(this.currentSizeToPlace == 0){
+                    this.currentPlacingSize--;
+                    this.currentSizeToPlace = 5 - this.currentPlacingSize;
+                }
+            }
+        return this.shipsLeft>0;
     }
 
     public boolean isPointValid(int x, int y) {
@@ -97,9 +137,5 @@ public class Board extends Parent {
             if(isPointValid(tempx,y))
                 getCell(tempx,y).setColorAndUsed(Color.BEIGE);
         }
-    }
-
-    public void destroyShip(){
-        this.shipsLeft--;
     }
 }

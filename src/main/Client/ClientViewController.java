@@ -13,16 +13,19 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import main.Utils.Command;
+import main.Utils.Package;
+import main.Utils.Point;
 
 /**
  * FXML Controller class
@@ -58,18 +61,14 @@ public class ClientViewController implements Initializable {
     @FXML
     private Button sendButton;
     @FXML
-    private TextField fieldAdres;
-    @FXML
-    private TextField fieldPort;
-    @FXML
-    private Button connectButton;
-    @FXML
     private BorderPane borderPane;
 
     public Board myBoard;
     public Board enemyBoard;
     private int myGameID;
     private ClientGameThread gameThread;
+    private ClientSocket clientSocket;
+    private Stage stage;
 
     private boolean shipPlacement = false;
     private boolean shooting = false;
@@ -77,67 +76,62 @@ public class ClientViewController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        gameThread = new ClientGameThread(this);
+        initBoards();
     }
 
     @FXML
-    private void connect(ActionEvent event) throws IOException {
-        String address;
-        int port;
-        try {
-            address = this.fieldAdres.getText();
-            port = Integer.parseInt(this.fieldPort.getText());
-        }
-        catch (NumberFormatException e){
-            e.printStackTrace();
-            System.err.println(e);
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Format liczbowy");
-            alert.setHeaderText(null);
-            alert.setContentText("Wprowadzona wartość portu nie jest rozpoznawana jako format liczbowy.");
-            alert.showAndWait();
-            return;
-        }
-        boolean result = this.gameThread.tryConnect(address,port);
-        if(result){
-            //initBoards();
-            Stage stage;
-            Parent root;
-            stage = (Stage)this.connectButton.getScene().getWindow();
-            root = FXMLLoader.load(getClass().getResource("ClientView.fxml"));
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
+    private void logIn(ActionEvent event){
+        Package pack = new Package(Command.LOGIN.toString(),this.nickField.getText());
+        this.clientSocket.sendMessage(pack.toString());
+    }
 
-        }
-        else {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Błąd połączenia");
-            alert.setHeaderText(null);
-            alert.setContentText("Nie udało się nawiązać połącznenia z serwerem. Sprawdź poprawność danych i spróbuj ponownie później");
-            alert.showAndWait();
-            System.exit(1);
-        }
+    public void setThreadAndStage(ClientGameThread gameThread, Stage stage) {
+        this.gameThread = gameThread;
+        this.gameThread.setViewController(this);
+        this.stage = stage;
+        this.clientSocket = this.gameThread.getClientSocket();
+        System.out.println("Inicjalizacja gotowa");
+        this.gameThread.start();
     }
 
     public void putInfo(String info){
         infoArea.setText(info);
     }
 
+    public void setInfoColor(Color paint){
+        Region content = (Region) infoArea.lookup(".content");
+        content.setStyle("-fx-background-color: " + toRgbString(paint) + ";");
+    }
+
     private void initBoards(){
         myBoard = new Board(event -> {
-            if(!shipPlacement && !shooting)
+            if(!shipPlacement)
+                return;
+            ClientCell cell = (ClientCell)event.getSource();
+            if(cell.wasUsed()){
+                return;
+            }
+            myBoard.setCurrentCell(cell);
+            boolean vertical = (event.getButton() == MouseButton.PRIMARY);
+            myBoard.setCurrentVertical(vertical);
+            Package pack = new Package(Command.PLACE_A_SHIP.toString(),Boolean.toString(vertical),cell.getXCoordinate(),cell.getYCoordinate(),myBoard.getCurrentPlacingSize());
+            this.clientSocket.sendMessage(pack.toString());
+        });
+        enemyBoard = new Board(event -> {
+            if(!shooting)
                 return;
             if(!myTurn)
                 return;
             ClientCell cell = (ClientCell)event.getSource();
             if(cell.wasUsed()){
-                //todo
                 return;
             }
-            cell.setFill(Color.GOLD);//for test
+            enemyBoard.setCurrentCell(cell);
+            boolean vertical = (event.getButton() == MouseButton.PRIMARY);
+            enemyBoard.setCurrentVertical(vertical);
+            Package pack = new Package(Command.SHOOT.toString(),cell.getXCoordinate(),cell.getYCoordinate());
+            this.clientSocket.sendMessage(pack.toString());
         });
-        enemyBoard = new Board(event -> {});
         HBox hbox = new HBox();
         VBox my = new VBox();
         VBox enemy = new VBox();
@@ -168,7 +162,21 @@ public class ClientViewController implements Initializable {
         this.myTurn = !myTurn;
     }
 
+    public void loginDisable(){
+        this.loginButton.setDisable(true);
+        this.nickField.setDisable(true);
+    }
 
+    private String toRgbString(Color c) {
+        return "rgb("
+                + to255Int(c.getRed())
+                + "," + to255Int(c.getGreen())
+                + "," + to255Int(c.getBlue())
+                + ")";
+    }
 
+    private int to255Int(double d) {
+        return (int) (d * 255);
+    }
 }
 

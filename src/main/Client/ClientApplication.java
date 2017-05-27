@@ -20,7 +20,7 @@ public class ClientApplication extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("LoginWindow.fxml"));
-        primaryStage.setTitle("Zaloguj");
+        primaryStage.setTitle("Statki");
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }

@@ -12,9 +12,9 @@ import java.net.UnknownHostException;
  * Created by Jakub on 2017-05-27.
  */
 public class ClientSocket {
-    private static Socket socket;
-    private static PrintWriter out;
-    private static BufferedReader in;
+    private Socket socket;
+    private PrintWriter out;
+    private BufferedReader in;
 
     public boolean connect(String address,int port){
         try {
@@ -30,12 +30,22 @@ public class ClientSocket {
         }
     }
 
-    public static void sendMessage(String message) {
+    public void sendMessage(String message) {
         out.println(message);
         System.out.println("Message sent to the client is "+message);
     }
 
-    public static String receiveMessage() {
+    public void close(){
+        try {
+            socket.close();
+            in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            }
+            out.close();
+        }
+
+    public String receiveMessage() {
         String msg = null;
         try {
             msg = in.readLine();

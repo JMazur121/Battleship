@@ -1,14 +1,16 @@
 package main.Utils;
 
+import com.sun.xml.internal.bind.v2.runtime.reflect.Lister;
+
 /**
  * Created by Jakub on 2017-05-23.
  */
 public class Package {
     private String command;
-    private String additional;
-    private int x;
-    private int y;
-    private int length;
+    private String additional=null;
+    private int x = -1;
+    private int y = -1;
+    private int length = -1;
 
     public Package(String command, String additional, int x, int y, int length) {
         this.command = command;
@@ -16,6 +18,17 @@ public class Package {
         this.x = x;
         this.y = y;
         this.length = length;
+    }
+
+    public Package(String command,int x,int y){
+        this.command = command;
+        this.x = x;
+        this.y = y;
+    }
+
+    public Package(String command,String additional){
+        this.command = command;
+        this.additional = additional;
     }
 
     public String toString(){

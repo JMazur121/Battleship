@@ -41,6 +41,8 @@ public class Server extends Thread {
         instance.createdGames.add(game);
     }
 
+    public synchronized void addName(String name) {instance.userNames.add(name);}
+
     public synchronized void deleteGame(Game game) {
         instance.createdGames.remove(game);
     }
@@ -71,11 +73,8 @@ public class Server extends Thread {
 
     public synchronized boolean checkNameAvailability(String name) {
         boolean available = true;
-        synchronized (instance.userNames) {
-            if (instance.userNames.contains(name)) {
-                available = false;
-            }
-        }
+        if(instance.userNames.contains(name))
+            available = false;
         return available;
     }
 
