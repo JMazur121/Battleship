@@ -56,19 +56,45 @@ public class Player extends Thread {
                     else if (command.equals("CREATE_GAME")) {
                         resetPlayer();
                         game = new Game(Server.getInstance().getNextGameID(), this);
-                        out.println(Command.WAIT_FOR_OPPONENT.toString());
+                        out.println(Command.WAIT_FOR_OPPONENT.toString() + "#" + game.getGameID());
                     }
+
+                    else if(command.equals("ABANDON_GAME")){
+                        if(this == game.getHost()){
+                            Player guest = this.game.getGuest();
+                            if (guest != null) {
+                                guest.sendToPlayer(Command.HOST_CHANGE.toString());
+                                this.game.setHost(guest);
+                                this.game.setGuest(null);
+                                this.sendToPlayer(Command.ABANDON_OK.toString());
+                            }
+                            else {
+                                this.sendToPlayer(Command.GAME_ABANDON_AND_DELETED.toString());
+                                this.resetPlayer();
+                                Server.getInstance().deleteGame(this.game);
+                            }
+                        }
+                        else {
+                            Player host = this.game.getHost();
+                            host.sendToPlayer(Command.OPPONENT_EXIT.toString());
+                            this.sendToPlayer(Command.ABANDON_OK.toString());
+                            this.game.setGuest(null);
+                        }
+                    }
+
                     else if (command.equals("DELETE_GAME")) {
                         if (this == this.game.getHost()) {
                             Player guest = this.game.getGuest();
                             if (guest != null) {
                                 guest.sendToPlayer(Command.HOST_DELETED_THIS_GAME.toString());
                                 guest.resetPlayer();
-                                Server.getInstance().deleteGame(this.game);
                             }
+                            Server.getInstance().deleteGame(this.game);
                             this.resetPlayer();
+                            this.sendToPlayer(Command.GAME_DELETED.toString());
                         }
-                    } else if (command.equals("JOIN_TO_GAME")) {
+                    }
+                    else if (command.equals("JOIN_TO_GAME")) {
                         resetPlayer();
                         int index = Integer.parseInt(tmp[1]);
                         Game toJoin = Server.getInstance().findGame(index);
@@ -82,7 +108,13 @@ public class Player extends Thread {
                         } else {
                             out.println(Command.JOIN_TO_GAME_FAILED.toString());
                         }
-                    } else if (command.equals("PLACE_A_SHIP")) {
+                    }
+
+                    else if(command.equals("GIVE_UP")){
+                        this.game.exitGame(this);
+                    }
+
+                    else if (command.equals("PLACE_A_SHIP")) {
                         try {
                             boolean vertical = Boolean.parseBoolean(tmp[1]);
                             int x = Integer.parseInt(tmp[2]);

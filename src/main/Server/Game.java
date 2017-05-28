@@ -22,6 +22,7 @@ public class Game {
         this.gameID = ID;
         this.host = player;
         hostBoard = new ServerBoard();
+        guestBoard = new ServerBoard();
         currentPlayer = host;
         Server.getInstance().addGame(this);
     }
@@ -63,6 +64,14 @@ public class Game {
         this.guest.sendToPlayer(message);
     }
 
+    public void setHost(Player host) {
+        this.host = host;
+    }
+
+    public void setGuest(Player guest) {
+        this.guest = guest;
+    }
+
     private void reset(){
         this.hostBoard.initializeBoard();
         this.guestBoard.initializeBoard();
@@ -94,28 +103,31 @@ public class Game {
 
     public void addPlayer(Player player) {
         this.guest = player;
-        this.guest.sendToPlayer(Command.JOINED.toString());
-        this.host.sendToPlayer(Command.PLACE_YOUR_SHIPS.toString());
+        this.guest.sendToPlayer(Command.JOINED.toString() + "#" + this.getGameID());
+        this.host.sendToPlayer(Command.OPPONENT_JOINED.toString());
         this.guest.sendToPlayer(Command.PLACE_YOUR_SHIPS.toString());
         this.isGameActive = true;
     }
 
     public void exitGame(Player player) {
-        this.getOpponent(player).sendToPlayer(Command.OPPONENT_EXIT.toString());
-        this.getOpponent(player).sendToPlayer(Command.YOU_WIN.toString());
+        this.getOpponent(player).sendToPlayer(Command.OPPONENT_GIVE_UP.toString());
         player.sendToPlayer(Command.YOU_LOSE.toString());
         this.isGameActive = false;
+        this.reset();
     }
 
     synchronized public void setReady(Player player){
-        if(player == this.host)
+        if(player == this.host) {
             this.hostReady = true;
-        else
+            this.guest.sendToPlayer(Command.OPPONENT_IS_READY.toString());
+        }
+        else {
             this.guestReady = true;
-
+            this.host.sendToPlayer(Command.OPPONENT_IS_READY.toString());
+        }
         if(this.guestReady && this.hostReady){
-            player.sendToPlayer(Command.OPPONENT_IS_READY.toString());
-            this.getOpponent(player).sendToPlayer(Command.OPPONENT_IS_READY.toString());
+            player.sendToPlayer(Command.YOUR_TURN.toString());
+            this.getOpponent(player).sendToPlayer(Command.NOT_YOUR_TURN.toString());
         }
     }
 
@@ -150,10 +162,8 @@ public class Game {
         ServerBoard opponentBoard = this.getPlayerBoard(opponent);
 
         if(opponentBoard.checkIfMissed(x,y)){//missed
-            shooter.sendToPlayer(Command.MISSED.toString()+"#"+x+"#"+y);
-            shooter.sendToPlayer(Command.NOT_YOUR_TURN.toString());
-            opponent.sendToPlayer(Command.OPPONENT_MISSED.toString()+"#"+x+"#"+y);
-            opponent.sendToPlayer(Command.YOUR_TURN.toString());
+            shooter.sendToPlayer(Command.MISSED_NOT_YOUR_TURN.toString()+"#"+x+"#"+y);
+            opponent.sendToPlayer(Command.OPPONENT_MISSED_YOUR_TURN.toString()+"#"+x+"#"+y);
             this.changePlayer();
         }
         else{//was hit
@@ -172,8 +182,7 @@ public class Game {
 
             }
             else {//hit, but ship stays alive
-                shooter.sendToPlayer(Command.HIT.toString()+"#"+x+"#"+y);
-                shooter.sendToPlayer(Command.SHOOT_AGAIN.toString());
+                shooter.sendToPlayer(Command.HIT_SHOOT_AGAIN.toString()+"#"+x+"#"+y);
                 opponent.sendToPlayer(Command.OPPONENT_HIT.toString()+"#"+x+"#"+y);
             }
         }

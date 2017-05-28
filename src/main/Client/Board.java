@@ -51,6 +51,8 @@ public class Board extends Parent {
 
     public int getCurrentPlacingSize(){return this.currentPlacingSize;}
 
+    public int getShipsLeft(){return this.shipsLeft;}
+
     public void repaintOnHit(int x, int y){
         ClientCell cell = getCell(x,y);
         cell.setColorAndUsed(Color.RED);
@@ -61,7 +63,7 @@ public class Board extends Parent {
         cell.setColorAndUsed(Color.CHOCOLATE);
     }
 
-    public boolean placeCurrentShip(){
+    public void placeCurrentShip(){
             if(this.isCurrentVertical){ //== vertical
                 for(int i=this.currentCell.getYCoordinate(); i<this.currentCell.getYCoordinate()+this.currentPlacingSize; i++){
                     getCell(this.currentCell.getXCoordinate(),i).setColorAndUsed(Color.BURLYWOOD);
@@ -84,7 +86,6 @@ public class Board extends Parent {
                     this.currentSizeToPlace = 5 - this.currentPlacingSize;
                 }
             }
-        return this.shipsLeft>0;
     }
 
     public boolean isPointValid(int x, int y) {
