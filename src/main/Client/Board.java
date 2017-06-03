@@ -41,6 +41,18 @@ public class Board extends Parent {
         return (ClientCell)((HBox)rows.getChildren().get(y)).getChildren().get(x);
     }
 
+    public void resetBoard(){
+        this.shipsLeft = 10;
+        this.currentPlacingSize = 4;
+        this.currentSizeToPlace = 1;
+        this.isCurrentVertical = true;
+        for(int x = 0; x<boardsize; x++){
+            for(int y = 0; y<boardsize; y++){
+                getCell(x,y).cleanCell();
+            }
+        }
+    }
+
     public void setCurrentCell(ClientCell currentCell) {
         this.currentCell = currentCell;
     }

@@ -2,7 +2,6 @@ package main.Client;
 
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import main.Utils.Command;
 
 /**
@@ -146,8 +145,7 @@ public class ClientGameThread extends Thread {
                 else if(command.equals(Command.OPPONENT_JOINED.toString())){
                     Platform.runLater(()->{
                         viewController.setInfoColor(Color.GREENYELLOW);
-                        viewController.putInfo("Przeciwnik dołączył i można już rozpocząć grę. Zacznij ustawiać swoje statki");
-                        viewController.changeShipPlacement(true);
+                        viewController.putInfo("Przeciwnik dołączył do gry.");
                     });
                 }
 
@@ -181,7 +179,126 @@ public class ClientGameThread extends Thread {
                         viewController.setInfoColor(Color.GREENYELLOW);
                         viewController.putInfo("Wszystkie statki juz ustawione. Jeśli jesteś gotów, kliknij GOTOWY");
                         viewController.setPlacementValidation(false);
+                        viewController.radioActivate();
+                        //viewController.setShipPlacement(false);
+                    });
+                }
+
+                else if(command.equals(Command.OPPONENT_IS_READY.toString())){
+                    Platform.runLater(()->{
+                        viewController.setInfoColor(Color.GREENYELLOW);
+                        viewController.putInfo("Twój przeciwnik jest juz gotowy");
+                    });
+                }
+
+                else if(command.equals(Command.INVITATION.toString())){
+                    Platform.runLater(()->{
+                        viewController.offerReceived();
+                    });
+                }
+
+                else if(command.equals(Command.OFFER_REJECT.toString())){
+                    Platform.runLater(()->{
+                        viewController.setInfoColor(Color.INDIANRED);
+                        viewController.putInfo("Przeciwnik odrzucił twoja propozycję");
+                    });
+                }
+
+                else if(command.equals(Command.YOUR_TURN.toString())){
+                    Platform.runLater(()->{
+                        viewController.setInfoColor(Color.GREENYELLOW);
+                        viewController.putInfo("Twój ruch. Kliknij w komórkę na planszy przeciwnika aby strzelić !!!");
+                        viewController.setPlacementValidation(false);
                         viewController.setShipPlacement(false);
+                        viewController.setShooting(true);
+                        viewController.setMyTurn(true);
+                        viewController.radioDeactivate();
+                    });
+                }
+
+                else if(command.equals(Command.NOT_YOUR_TURN.toString())){
+                    Platform.runLater(()->{
+                        viewController.setInfoColor(Color.LIGHTGREY);
+                        viewController.putInfo("Grę rozpocznie twój przeciwnik. Poczekaj na swoją kolej");
+                        viewController.setShooting(true);
+                        viewController.setMyTurn(false);
+                        viewController.radioDeactivate();
+                    });
+                }
+
+                else if(command.equals(Command.MISSED_NOT_YOUR_TURN.toString())){
+                    Platform.runLater(()->{
+                        viewController.setInfoColor(Color.INDIANRED);
+                        viewController.putInfo("Pudło ! . Musisz zaczekać na swoją kolej");
+                        viewController.setMyTurn(false);
+                        viewController.enemyBoard.repaintOnMissed(Integer.parseInt(tmp[1]),Integer.parseInt(tmp[2]));
+                    });
+                }
+
+                else if(command.equals(Command.OPPONENT_MISSED_YOUR_TURN.toString())){
+                    Platform.runLater(()->{
+                        viewController.setInfoColor(Color.GREENYELLOW);
+                        viewController.putInfo("Przeciwnik spudłował. Teraz twoja kolej");
+                        viewController.setMyTurn(true);
+                        viewController.myBoard.repaintOnMissed(Integer.parseInt(tmp[1]),Integer.parseInt(tmp[2]));
+                    });
+                }
+
+                else if(command.equals(Command.HIT_SHOOT_AGAIN.toString())){
+                    Platform.runLater(()->{
+                        viewController.setInfoColor(Color.GREENYELLOW);
+                        viewController.putInfo("Trafiłeś, ale statek wciąż pozostaje na powierzchni. Strzelaj jeszcze raz !!!");
+                        viewController.setMyTurn(true);
+                        viewController.enemyBoard.repaintOnHit(Integer.parseInt(tmp[1]),Integer.parseInt(tmp[2]));
+                    });
+                }
+
+                else if(command.equals(Command.OPPONENT_HIT.toString())){
+                    Platform.runLater(()->{
+                        viewController.setInfoColor(Color.INDIANRED);
+                        viewController.putInfo("Przeciwnik trafia !!! Musisz zaczekać na swoją kolej");
+                        viewController.setMyTurn(false);
+                        viewController.myBoard.repaintOnHit(Integer.parseInt(tmp[1]),Integer.parseInt(tmp[2]));
+                    });
+                }
+
+                else if(command.equals(Command.HIT_AND_SINK.toString())){
+                    Platform.runLater(()->{
+                        viewController.setInfoColor(Color.GREENYELLOW);
+                        viewController.putInfo("Trafiony - zatopiony !!! Przeciwnik wciąż ma statki do zatopienia - strzelaj dalej !!! ");
+                        viewController.setMyTurn(true);
+                        viewController.enemyBoard.repaintOnHit(Integer.parseInt(tmp[1]),Integer.parseInt(tmp[2]));
+                    });
+                }
+
+                else if(command.equals(Command.OPPONENT_HIT_AND_SINK.toString())){
+                    Platform.runLater(()->{
+                        viewController.setInfoColor(Color.INDIANRED);
+                        viewController.putInfo("Przeciwnik zatapia twój statek !!! Czekaj na swoją kolej");
+                        viewController.setMyTurn(false);
+                        viewController.myBoard.repaintOnHit(Integer.parseInt(tmp[1]),Integer.parseInt(tmp[2]));
+                    });
+                }
+
+                else if(command.equals(Command.PLAYER_HINT.toString())){
+                    Platform.runLater(()->{
+                        viewController.enemyBoard.paintHintAfterKill(Integer.parseInt(tmp[1]),Integer.parseInt(tmp[2]),Integer.parseInt(tmp[3]),Boolean.parseBoolean(tmp[4]));
+                    });
+                }
+
+                else if(command.equals(Command.YOU_WIN.toString())){
+                    Platform.runLater(()->{
+                        viewController.setInfoColor(Color.GREENYELLOW);
+                        viewController.putInfo("WYGRYWASZ !!!");
+                        viewController.reset();
+                    });
+                }
+
+                else if(command.equals(Command.YOU_LOSE.toString())){
+                    Platform.runLater(()->{
+                        viewController.setInfoColor(Color.INDIANRED);
+                        viewController.putInfo("PRZEGRYWASZ !!!");
+                        viewController.reset();
                     });
                 }
             }

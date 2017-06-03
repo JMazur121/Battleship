@@ -1,5 +1,6 @@
 package main.Server;
 
+import javafx.application.Platform;
 import main.Utils.Command;
 
 import java.io.BufferedReader;
@@ -110,6 +111,22 @@ public class Player extends Thread {
                         }
                     }
 
+                    else if(command.equals("INVITATION")){
+                        if(!this.game.isGameActive()) {
+                            Player opponent = this.game.getOpponent(this);
+                            opponent.sendToPlayer(Command.INVITATION.toString());
+                        }
+                    }
+
+                    else if(command.equals("OFFER_ACCEPT")){
+                        this.game.startGame(this.game.getOpponent(this));
+                    }
+
+                    else if(command.equals("OFFER_REJECT")){
+                        Player opponent = this.game.getOpponent(this);
+                        opponent.sendToPlayer(Command.OFFER_REJECT.toString());
+                    }
+
                     else if(command.equals("GIVE_UP")){
                         this.game.exitGame(this);
                     }
@@ -124,10 +141,17 @@ public class Player extends Thread {
                         } catch (NumberFormatException e) {
                             e.printStackTrace();
                         }
-                    } else if (command.equals("SHOOT")) {
+                    }
+
+                    else if(command.equals("READY")){
+                        this.game.setReady(this);
+                    }
+
+                    else if (command.equals("SHOOT")) {
                         try {
                             int x = Integer.parseInt(tmp[1]);
                             int y = Integer.parseInt(tmp[2]);
+                            Server.getInstance().printLog(x +","+y);
                             this.game.shoot(this, x, y);
                         } catch (NumberFormatException e) {
                             e.printStackTrace();

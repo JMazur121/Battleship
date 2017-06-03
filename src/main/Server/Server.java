@@ -78,6 +78,8 @@ public class Server extends Thread {
         return available;
     }
 
+    synchronized public void printLog(String log){System.out.println(log);}
+
     public synchronized int getNextGameID() {
         gameID++;
         return gameID - 1;

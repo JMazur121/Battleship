@@ -38,7 +38,7 @@ public class ServerBoard {
     }
 
     public ServerCell getCell(int x,int y){
-        return this.board[x][y];
+        return this.board[y][x];
     }
 
     private boolean isPointValid(int x, int y) {
@@ -99,7 +99,7 @@ public class ServerBoard {
 
     /**
      *  This method checks placement possibility.
-     *  Firstly, it checks if ship stays in Borders. Then, it checks if all required cells are empty.
+     *  Firstly, it checks if ship stays in Borders. Then it checks if all required cells are empty.
      *  Finally, it checks all adjacent cells.
      * @param  x x coordinate for most bottom ship cell (if vertical) or coordinate for most left cell(if horizontal)
      * @param  y y coordinate for most bottom ship cell (if vertical) or coordinate for most left cell(if horizontal)
@@ -149,24 +149,25 @@ public class ServerBoard {
     }
 
     public boolean checkIfMissed(int x,int y) {
-        return getCell(x,y).isShip();
+        return !getCell(x,y).isShip();
     }
 
     public boolean destroyShip(){
         this.unitsLeft--;
-        return this.unitsLeft > 0;
+        return !(this.unitsLeft > 0);
     }
 
     public boolean placeShip(Ship shipToPlace,int x,int y){
         if(isPlacementPossible(shipToPlace, x, y)){
+            shipToPlace.setFirstCell(x,y);
             if(shipToPlace.getOrientation()){ //== vertical
                 for(int i=y; i<y+shipToPlace.getLength(); i++){
-                    getCell(x,i).placeShip(shipToPlace);
+                    this.getCell(x,i).placeShip(shipToPlace);
                 }
             }
             else{ //horizontal
                 for(int i=x; i<x+shipToPlace.getLength(); i++){
-                    getCell(i,y).placeShip(shipToPlace);
+                    this.getCell(i,y).placeShip(shipToPlace);
                 }
             }
             return true;

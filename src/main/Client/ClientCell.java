@@ -32,6 +32,11 @@ public class ClientCell extends Rectangle {
         this.wasUsed = true;
     }
 
+    public void cleanCell(){
+        this.wasUsed = false;
+        this.setFill(Color.DODGERBLUE);
+    }
+
     public int getXCoordinate() {
         return position.getX();
     }

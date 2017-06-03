@@ -1,6 +1,8 @@
 package main.Server;
 
 import main.Utils.Command;
+import main.Utils.Point;
+import main.Utils.Package;
 
 /**
  * Created by Jakub on 2017-05-20.
@@ -23,7 +25,6 @@ public class Game {
         this.host = player;
         hostBoard = new ServerBoard();
         guestBoard = new ServerBoard();
-        currentPlayer = host;
         Server.getInstance().addGame(this);
     }
 
@@ -60,8 +61,10 @@ public class Game {
     }
 
     public void sendToBothPlayers(String message){
-        this.host.sendToPlayer(message);
-        this.guest.sendToPlayer(message);
+        if(this.host != null)
+            this.host.sendToPlayer(message);
+        if(this.guest != null)
+            this.guest.sendToPlayer(message);
     }
 
     public void setHost(Player host) {
@@ -90,7 +93,7 @@ public class Game {
         return twoPlayers;
     }
 
-    private Player getOpponent(Player player) {
+    public Player getOpponent(Player player) {
         if (player == host) return guest;
         else return host;
     }
@@ -105,8 +108,13 @@ public class Game {
         this.guest = player;
         this.guest.sendToPlayer(Command.JOINED.toString() + "#" + this.getGameID());
         this.host.sendToPlayer(Command.OPPONENT_JOINED.toString());
-        this.guest.sendToPlayer(Command.PLACE_YOUR_SHIPS.toString());
+    }
+
+    public void startGame(Player player){
         this.isGameActive = true;
+        this.guest.sendToPlayer(Command.PLACE_YOUR_SHIPS.toString());
+        this.host.sendToPlayer(Command.PLACE_YOUR_SHIPS.toString());
+        this.currentPlayer = player;
     }
 
     public void exitGame(Player player) {
@@ -126,8 +134,8 @@ public class Game {
             this.host.sendToPlayer(Command.OPPONENT_IS_READY.toString());
         }
         if(this.guestReady && this.hostReady){
-            player.sendToPlayer(Command.YOUR_TURN.toString());
-            this.getOpponent(player).sendToPlayer(Command.NOT_YOUR_TURN.toString());
+            this.currentPlayer.sendToPlayer(Command.YOUR_TURN.toString());
+            this.getOpponent(this.currentPlayer).sendToPlayer(Command.NOT_YOUR_TURN.toString());
         }
     }
 
@@ -160,7 +168,7 @@ public class Game {
     public void shoot(Player shooter,int x, int y){
         Player opponent = this.getOpponent(shooter);
         ServerBoard opponentBoard = this.getPlayerBoard(opponent);
-
+        Server.getInstance().printLog(shooter.getUserName() + ","+opponent.getUserName());
         if(opponentBoard.checkIfMissed(x,y)){//missed
             shooter.sendToPlayer(Command.MISSED_NOT_YOUR_TURN.toString()+"#"+x+"#"+y);
             opponent.sendToPlayer(Command.OPPONENT_MISSED_YOUR_TURN.toString()+"#"+x+"#"+y);
@@ -168,8 +176,6 @@ public class Game {
         }
         else{//was hit
             if(opponentBoard.hit(x,y)){//hit and sink
-                shooter.sendToPlayer(Command.HIT_AND_SINK.toString()+"#"+x+"#"+y);
-                opponent.sendToPlayer(Command.OPPONENT_HIT_AND_SINK.toString()+"#"+x+"#"+y);
                 if(opponentBoard.destroyShip()){// all ships gone
                     shooter.sendToPlayer(Command.YOU_WIN.toString());
                     opponent.sendToPlayer(Command.YOU_LOSE.toString());
@@ -177,7 +183,11 @@ public class Game {
                     this.reset();
                 }
                 else {//player has > 0 ships
-                    shooter.sendToPlayer(Command.SHOOT_AGAIN.toString());
+                    shooter.sendToPlayer(Command.HIT_AND_SINK.toString()+"#"+x+"#"+y);
+                    opponent.sendToPlayer(Command.OPPONENT_HIT_AND_SINK.toString()+"#"+x+"#"+y);
+                    Ship wreck = opponentBoard.getCell(x,y).getShip();
+                    Point firstCell = wreck.getFirstCell();
+                    shooter.sendToPlayer(Command.PLAYER_HINT.toString()+"#"+firstCell.getX()+"#"+firstCell.getY()+"#"+wreck.getLength()+"#"+wreck.getOrientation());
                 }
 
             }
@@ -186,6 +196,7 @@ public class Game {
                 opponent.sendToPlayer(Command.OPPONENT_HIT.toString()+"#"+x+"#"+y);
             }
         }
+
     }
 }
 

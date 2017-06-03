@@ -1,5 +1,9 @@
 package main.Server;
 
+import main.Utils.Point;
+
+import java.util.ArrayList;
+
 /**
  * Created by Jakub on 2017-05-15.
  */
@@ -7,6 +11,7 @@ public class Ship {
     private final int length;
     private int hitpoints;
     private boolean vertorientation;
+    private Point firstCell;
 
     public Ship(int length, boolean orientation) {
         this.length = length;
@@ -33,4 +38,8 @@ public class Ship {
     public void damage(){
         this.hitpoints--;
     }
+
+    public void setFirstCell(int x, int y) { this.firstCell = new Point(x,y);}
+
+    public Point getFirstCell() { return firstCell;}
 }

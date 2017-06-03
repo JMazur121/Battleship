@@ -3,6 +3,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
@@ -102,8 +103,9 @@
             <VBox fx:id="VBoxEnemy" prefHeight="350.0" prefWidth="300.0" />
             <VBox fx:id="VBoxControl" alignment="CENTER" prefHeight="350.0" prefWidth="130.0" spacing="10.0">
                <children>
-                  <Button fx:id="playButton" mnemonicParsing="false" prefHeight="30.0" prefWidth="130.0" text="Zagrajmy" />
-                  <Button fx:id="readyButton" mnemonicParsing="false" prefHeight="30.0" prefWidth="130.0" text="Gotowy" />
+                  <Button fx:id="buttonOffer" mnemonicParsing="false" onAction="#sendOffer" prefHeight="22.0" prefWidth="127.0" text="Zaproponuj grę" />
+                  <RadioButton fx:id="radioPlacement" mnemonicParsing="false" text="Umieszczanie statków" />
+                  <RadioButton fx:id="radioReady" mnemonicParsing="false" text="Gotów" />
                </children></VBox>
          </children>
       </HBox>

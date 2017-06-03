@@ -9,6 +9,7 @@ import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -58,9 +59,11 @@ public class ClientViewController implements Initializable {
     @FXML
     private Button buttonGiveUp;
     @FXML
-    private Button playButton;
+    private Button buttonOffer;
     @FXML
-    private Button readyButton;
+    private RadioButton radioPlacement;
+    @FXML
+    private RadioButton radioReady;
     @FXML
     private VBox chat;
     @FXML
@@ -82,9 +85,12 @@ public class ClientViewController implements Initializable {
     @FXML
     private BorderPane borderPane;
 
+    private ToggleGroup radioGroup;
+
     public Board myBoard;
     public Board enemyBoard;
     private int myGameID = -1;
+    private int messagesCount = 0;
     private ClientGameThread gameThread;
     private ClientSocket clientSocket;
     private Stage stage;
@@ -109,6 +115,16 @@ public class ClientViewController implements Initializable {
         this.gamesCombo.setDisable(true);
         this.buttonGiveUp.setDisable(true);
         this.chatField.setDisable(true);
+        this.radioGroup = new ToggleGroup();
+        this.radioPlacement.setToggleGroup(radioGroup);
+        this.radioPlacement.setSelected(true);
+        this.radioReady.setToggleGroup(radioGroup);
+
+        this.radioReady.setOnMouseClicked(event -> {
+            this.clientSocket.sendMessage(Command.READY.toString());
+        });
+        this.radioPlacement.setSelected(true);
+        this.radioDeactivate();
     }
 
     @FXML
@@ -177,6 +193,44 @@ public class ClientViewController implements Initializable {
             }
             else
                 return;
+    }
+
+    @FXML
+    private void sendOffer(ActionEvent event){
+        this.clientSocket.sendMessage(Command.INVITATION.toString());
+    }
+
+    public void radioDeactivate() {
+        this.radioPlacement.setDisable(true);
+        this.radioReady.setDisable(true);
+    }
+
+    public void radioActivate(){
+        this.radioPlacement.setDisable(false);
+        this.radioReady.setDisable(false);
+    }
+
+    public void chatReceived(String msg){
+        if(this.messagesCount < 100) {
+            this.chatArea.appendText(msg);
+        }
+        else{
+            this.chatArea.deleteText(0,1);
+            this.chatArea.appendText(msg);
+        }
+    }
+
+    public void offerReceived(){
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Propozycja gry");
+        alert.setHeaderText(null);
+        alert.setContentText("Przeciwnik proponuje rozpoczęcie gry. Co odpowiesz?");
+        Optional<ButtonType> action = alert.showAndWait();
+        if(action.get() == ButtonType.OK){
+            this.clientSocket.sendMessage(Command.OFFER_ACCEPT.toString());
+        }
+        else
+            this.clientSocket.sendMessage(Command.OFFER_REJECT.toString());
     }
 
     public void addGameToList(String gameInfo){
@@ -278,6 +332,7 @@ public class ClientViewController implements Initializable {
             myBoard.setCurrentCell(cell);
             boolean vertical = (event.getButton() == MouseButton.PRIMARY);
             myBoard.setCurrentVertical(vertical);
+            System.out.println(cell.getXCoordinate()+" "+cell.getYCoordinate());
             Package pack = new Package(Command.PLACE_A_SHIP.toString(),Boolean.toString(vertical),cell.getXCoordinate(),cell.getYCoordinate(),myBoard.getCurrentPlacingSize());
             this.clientSocket.sendMessage(pack.toString());
             setPlacementValidation(true);
@@ -294,10 +349,9 @@ public class ClientViewController implements Initializable {
             if(cell.wasUsed()){
                 return;
             }
-            enemyBoard.setCurrentCell(cell);
-            boolean vertical = (event.getButton() == MouseButton.PRIMARY);
-            enemyBoard.setCurrentVertical(vertical);
+            System.out.println(cell.getXCoordinate()+" "+cell.getYCoordinate());
             Package pack = new Package(Command.SHOOT.toString(),cell.getXCoordinate(),cell.getYCoordinate());
+            System.out.println(pack.toString());
             this.clientSocket.sendMessage(pack.toString());
         });
 
@@ -313,11 +367,13 @@ public class ClientViewController implements Initializable {
         this.VBoxEnemy.getChildren().add(enemyLabel);
     }
 
-    private void reset(){
+    public void reset(){
         this.shooting = false;
         this.shipPlacement = false;
         this.myTurn = false;
         this.placementValidation = false;
+        this.myBoard.resetBoard();
+        this.enemyBoard.resetBoard();
     }
 
     public void afterLoginButtons(){
@@ -326,10 +382,6 @@ public class ClientViewController implements Initializable {
         this.gamesCombo.setDisable(false);
         changeLoginButtonStatus(false);
         this.nickField.setDisable(true);
-    }
-
-    public void changeTurn(){
-        this.myTurn = !myTurn;
     }
 
     private String toRgbString(Color c) {
