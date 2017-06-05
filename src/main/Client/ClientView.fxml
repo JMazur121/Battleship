@@ -3,9 +3,11 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -79,16 +81,16 @@
                      </font>
                   </Label>
                   <TextArea fx:id="infoArea" editable="false" prefHeight="53.0" prefWidth="431.0" wrapText="true" />
+                  <ListView fx:id="chatArea" prefHeight="200.0" prefWidth="200.0" />
                   <Label text="Chat">
                      <font>
                         <Font size="15.0" />
                      </font>
                   </Label>
-                  <TextArea fx:id="chatArea" editable="false" prefHeight="120.0" prefWidth="431.0" wrapText="true" />
                   <HBox prefHeight="35.0" prefWidth="400.0">
                      <children>
                         <TextField fx:id="chatField" prefHeight="35.0" prefWidth="360.0" />
-                        <Button fx:id="sendButton" mnemonicParsing="false" prefHeight="35.0" prefWidth="75.0" text="Wyślij" />
+                        <Button fx:id="sendButton" mnemonicParsing="false" onAction="#sendChatMessage" prefHeight="35.0" prefWidth="75.0" text="Wyślij" />
                      </children>
                   </HBox>
                </children>
@@ -101,11 +103,25 @@
          <children>
             <VBox fx:id="VBoxMy" prefHeight="350.0" prefWidth="300.0" />
             <VBox fx:id="VBoxEnemy" prefHeight="350.0" prefWidth="300.0" />
-            <VBox fx:id="VBoxControl" alignment="CENTER" prefHeight="350.0" prefWidth="130.0" spacing="10.0">
+            <VBox fx:id="VBoxControl" alignment="CENTER" prefHeight="350.0" prefWidth="130.0" spacing="15.0">
                <children>
                   <Button fx:id="buttonOffer" mnemonicParsing="false" onAction="#sendOffer" prefHeight="22.0" prefWidth="127.0" text="Zaproponuj grę" />
                   <RadioButton fx:id="radioPlacement" mnemonicParsing="false" text="Umieszczanie statków" />
                   <RadioButton fx:id="radioReady" mnemonicParsing="false" text="Gotów" />
+                  <VBox fx:id="sizeBox" spacing="5.0">
+                     <children>
+                        <RadioButton fx:id="radio4" mnemonicParsing="false" text="Rozmiar : 4" />
+                        <RadioButton fx:id="radio3" mnemonicParsing="false" text="Rozmiar : 3" />
+                        <RadioButton fx:id="radio2" mnemonicParsing="false" text="Rozmiar : 2" />
+                        <RadioButton fx:id="radio1" mnemonicParsing="false" text="Rozmiar : 1" />
+                     </children>
+                  </VBox>
+                  <HBox alignment="CENTER" prefHeight="50.0" prefWidth="130.0" spacing="5.0">
+                     <children>
+                        <ToggleButton fx:id="removeShip" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" />
+                        <Label prefHeight="43.0" prefWidth="58.0" text="Usuń statek" />
+                     </children>
+                  </HBox>
                </children></VBox>
          </children>
       </HBox>

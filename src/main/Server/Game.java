@@ -25,7 +25,6 @@ public class Game {
         this.host = player;
         hostBoard = new ServerBoard();
         guestBoard = new ServerBoard();
-        Server.getInstance().addGame(this);
     }
 
     private void changePlayer() {
@@ -58,13 +57,6 @@ public class Game {
 
     public String getInfo() {
         return Integer.toString(this.getGameID()) + "#" + this.getHost().getUserName();
-    }
-
-    public void sendToBothPlayers(String message){
-        if(this.host != null)
-            this.host.sendToPlayer(message);
-        if(this.guest != null)
-            this.guest.sendToPlayer(message);
     }
 
     public void setHost(Player host) {
@@ -163,6 +155,13 @@ public class Game {
                 player.sendToPlayer(Command.PLACEMENT_FAILED.toString());
             }
         }
+    }
+
+    synchronized public void removeShip(Player p,int x, int y){
+        ServerBoard board = this.getPlayerBoard(p);
+        Ship removed = board.removeShip(x, y);
+        Package pack = new Package(Command.REMOVE_OK.toString(),Boolean.toString(removed.getOrientation()),removed.getFirstCell().getX(),removed.getFirstCell().getY(),removed.getLength());
+        p.sendToPlayer(pack.toString());
     }
 
     public void shoot(Player shooter,int x, int y){

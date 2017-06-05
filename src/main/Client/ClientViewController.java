@@ -3,12 +3,12 @@ package main.Client;
 /**
  * Created by Jakub on 2017-05-20.
  */
-import java.awt.event.MouseEvent;
-import java.io.IOException;
+
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -21,6 +21,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -29,7 +30,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import main.Utils.Command;
 import main.Utils.Package;
-import main.Utils.Point;
+import javafx.scene.image.Image;
 
 /**
  * FXML Controller class
@@ -38,8 +39,6 @@ import main.Utils.Point;
  */
 public class ClientViewController implements Initializable {
 
-    @FXML
-    private VBox options;
     @FXML
     private TextField nickField;
     @FXML
@@ -65,32 +64,37 @@ public class ClientViewController implements Initializable {
     @FXML
     private RadioButton radioReady;
     @FXML
-    private VBox chat;
+    private RadioButton radio1;
+    @FXML
+    private RadioButton radio2;
+    @FXML
+    private RadioButton radio3;
+    @FXML
+    private RadioButton radio4;
+    @FXML
+    private ToggleButton removeShip;
     @FXML
     private VBox VBoxMy;
     @FXML
     private VBox VBoxEnemy;
     @FXML
-    private VBox VBoxControl;
-    @FXML
-    private HBox Boards;
+    private VBox sizeBox;
     @FXML
     private TextArea infoArea;
     @FXML
-    private TextArea chatArea;
+    private ListView<String> chatArea;
     @FXML
     private TextField chatField;
     @FXML
     private Button sendButton;
-    @FXML
-    private BorderPane borderPane;
 
     private ToggleGroup radioGroup;
+    private ToggleGroup sizeGroup;
 
-    public Board myBoard;
-    public Board enemyBoard;
+    public PlayerBoard myBoard;
+    public EnemyBoard enemyBoard;
     private int myGameID = -1;
-    private int messagesCount = 0;
+    private String myName;
     private ClientGameThread gameThread;
     private ClientSocket clientSocket;
     private Stage stage;
@@ -99,19 +103,25 @@ public class ClientViewController implements Initializable {
     private boolean placementValidation = false;
     private boolean shooting = false;
     private boolean myTurn = false;
+    private boolean removing = false;
 
     private ObservableList<String> gameList;
+    private ObservableList<String> messageList;
+
+    //Initialize methods
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        initBoards();
         this.buttonDeleteGame.setDisable(true);
         this.createButton.setDisable(true);
         this.exitButton.setDisable(true);
         this.joinButton.setDisable(true);
         this.sendButton.setDisable(true);
+        this.buttonOffer.setDisable(true);
         this.gameList = FXCollections.observableArrayList();
+        this.messageList = FXCollections.observableArrayList();
         this.gamesCombo.setItems(this.gameList);
+        this.chatArea.setItems(this.messageList);
         this.gamesCombo.setDisable(true);
         this.buttonGiveUp.setDisable(true);
         this.chatField.setDisable(true);
@@ -124,13 +134,155 @@ public class ClientViewController implements Initializable {
             this.clientSocket.sendMessage(Command.READY.toString());
         });
         this.radioPlacement.setSelected(true);
+        this.radio4.setUserData(4);
+        this.radio3.setUserData(3);
+        this.radio2.setUserData(2);
+        this.radio1.setUserData(1);
+        this.sizeGroup = new ToggleGroup();
+        this.radio1.setToggleGroup(sizeGroup);
+        this.radio2.setToggleGroup(sizeGroup);
+        this.radio3.setToggleGroup(sizeGroup);
+        this.radio4.setToggleGroup(sizeGroup);
+        this.radio4.setSelected(true);
+        this.radioDeactivate();
+        this.radioSizesListener();
+        this.radioSizeDeactivate();
+        this.sizeBox.setDisable(true);
+        initBoards();
+        Image minus = new Image(getClass().getResourceAsStream("/src/main/Utils/minus.png"));
+        this.removeShip.setGraphic(new ImageView(minus));
+        this.removeToggleAction();
+    }
+
+    private void initBoards(){
+        myBoard = new PlayerBoard(event -> {
+            if(!shipPlacement)
+                return;
+            if(placementValidation){
+                setInfoColor(Color.INDIANRED);
+                putInfo("Poczekaj na odpowiedź serwera zanim postawisz kolejny statek");
+                return;
+            }
+            if((myBoard.getShipsLeft() == 0) && !removing){
+                setInfoColor(Color.INDIANRED);
+                putInfo("Postawiłeś już maksymalną ilość statków !!!");
+                return;
+            }
+            ClientCell cell = (ClientCell)event.getSource();
+            if(removing){
+                if(!cell.wasUsed()){
+                    setInfoColor(Color.INDIANRED);
+                    putInfo("Na tym polu nie stoi żaden statek. Kliknij pole zawierające statek !!!");
+                    return;
+                }
+                Package pack = new Package(Command.REMOVE_SHIP.toString(),cell.getXCoordinate(),cell.getYCoordinate());
+                this.clientSocket.sendMessage(pack.toString());
+                setPlacementValidation(true);
+                return;
+            }
+            if(cell.wasUsed()){
+                return;
+            }
+            myBoard.setCurrentCell(cell);
+            boolean vertical = (event.getButton() == MouseButton.PRIMARY);
+            myBoard.setCurrentVertical(vertical);
+            Package pack = new Package(Command.PLACE_A_SHIP.toString(),Boolean.toString(vertical),cell.getXCoordinate(),cell.getYCoordinate(),myBoard.getCurrentPlacingSize());
+            this.clientSocket.sendMessage(pack.toString());
+            setPlacementValidation(true);
+            this.sizeBox.setDisable(true);
+        },this);
+        enemyBoard = new EnemyBoard(event -> {
+            if(!shooting)
+                return;
+            if(!myTurn){
+                setInfoColor(Color.INDIANRED);
+                putInfo("Czekaj na swoją kolej !!!");
+                return;
+            }
+            ClientCell cell = (ClientCell)event.getSource();
+            if(cell.wasUsed()){
+                return;
+            }
+            System.out.println(cell.getXCoordinate()+" "+cell.getYCoordinate());
+            Package pack = new Package(Command.SHOOT.toString(),cell.getXCoordinate(),cell.getYCoordinate());
+            System.out.println(pack.toString());
+            this.clientSocket.sendMessage(pack.toString());
+        });
+        this.VBoxMy.getChildren().add(myBoard);
+        Label mylabel = new Label();
+        mylabel.setText("Plansza gracza");
+        mylabel.setAlignment(Pos.CENTER);
+        Label enemyLabel = new Label();
+        enemyLabel.setText("Plansza przeciwnika");
+        enemyLabel.setAlignment(Pos.CENTER);
+        this.VBoxMy.getChildren().add(mylabel);
+        this.VBoxEnemy.getChildren().add(enemyBoard);
+        this.VBoxEnemy.getChildren().add(enemyLabel);
+    }
+
+    private void radioSizesListener(){
+        sizeGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>(){
+            public void changed(ObservableValue<? extends Toggle> ov,
+                                Toggle old_toggle, Toggle new_toggle) {
+                if (sizeGroup.getSelectedToggle() != null) {
+                    int size = (int)sizeGroup.getSelectedToggle().getUserData();
+                    System.out.println("Aktualny rozmiar : "+ size);
+                    myBoard.setCurrentPlacingSize(size);
+                }
+            }
+        });
+    }
+
+    private void removeToggleAction(){
+        this.removeShip.setOnMouseClicked(event -> {
+            if(this.removeShip.isSelected()) {
+                this.removing = true;
+                System.out.println("true");
+            }
+            else {
+                removing = false;
+                System.out.println(false);
+            }
+        });
+    }
+
+    //End of initialize methods
+
+    //Resets boards
+    public void reset(){
+        this.shooting = false;
+        this.shipPlacement = false;
+        this.myTurn = false;
+        this.placementValidation = false;
+        this.myBoard.resetBoard();
+        this.enemyBoard.resetBoard();
+        this.radioSizeActivate();
+        this.sizeBox.setDisable(true);
         this.radioDeactivate();
     }
 
+    public void setNewSizeRadio(){
+        this.sizeBox.setDisable(false);
+        for (Toggle t: this.sizeGroup.getToggles()){
+            if(((RadioButton)t).isDisabled())
+                continue;
+            t.setSelected(true);
+        }
+    }
+
+    public ToggleGroup getSizeGroup() {
+        return sizeGroup;
+    }
+
+    // FXML ActionEvent handlers
     @FXML
     private void logIn(ActionEvent event){
-        Package pack = new Package(Command.LOGIN.toString(),this.nickField.getText());
-        this.clientSocket.sendMessage(pack.toString());
+        if(!this.nickField.getText().isEmpty()) {
+            Package pack = new Package(Command.LOGIN.toString(), this.nickField.getText());
+            this.clientSocket.sendMessage(pack.toString());
+            this.myName = this.nickField.getText();
+        }
+
     }
 
     @FXML
@@ -145,6 +297,21 @@ public class ClientViewController implements Initializable {
         }
         else
             return;
+    }
+
+    @FXML
+    private void sendChatMessage(ActionEvent event){
+        if(!this.chatField.getText().isEmpty()){
+            String message = this.myName + " : " +this.chatField.getText();
+            Package pack = new Package(Command.CHAT_MESSAGE.toString(),message);
+            this.chatReceived(message);
+            this.clientSocket.sendMessage(pack.toString());
+            this.chatField.clear();
+        }
+        else{
+            setInfoColor(Color.INDIANRED);
+            putInfo("Nie wpisałeś żadnej wiadomości !!!");
+        }
     }
 
     @FXML
@@ -200,6 +367,9 @@ public class ClientViewController implements Initializable {
         this.clientSocket.sendMessage(Command.INVITATION.toString());
     }
 
+    //End of FXML ActionEvent handlers
+
+    //Activating / Deactivating GUI elements
     public void radioDeactivate() {
         this.radioPlacement.setDisable(true);
         this.radioReady.setDisable(true);
@@ -210,64 +380,18 @@ public class ClientViewController implements Initializable {
         this.radioReady.setDisable(false);
     }
 
-    public void chatReceived(String msg){
-        if(this.messagesCount < 100) {
-            this.chatArea.appendText(msg);
-        }
-        else{
-            this.chatArea.deleteText(0,1);
-            this.chatArea.appendText(msg);
-        }
+    public void radioSizeDeactivate(){
+        this.radio4.setDisable(true);
+        this.radio3.setDisable(true);
+        this.radio2.setDisable(true);
+        this.radio1.setDisable(true);
     }
 
-    public void offerReceived(){
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Propozycja gry");
-        alert.setHeaderText(null);
-        alert.setContentText("Przeciwnik proponuje rozpoczęcie gry. Co odpowiesz?");
-        Optional<ButtonType> action = alert.showAndWait();
-        if(action.get() == ButtonType.OK){
-            this.clientSocket.sendMessage(Command.OFFER_ACCEPT.toString());
-        }
-        else
-            this.clientSocket.sendMessage(Command.OFFER_REJECT.toString());
-    }
-
-    public void addGameToList(String gameInfo){
-        this.gameList.add(gameInfo);
-    }
-
-    public void removeGameFromList(String gameInfo){
-        this.gameList.remove(gameInfo);
-    }
-
-    public void changeShipPlacement(Boolean status){
-        this.shipPlacement = status;
-    }
-
-    public void setPlacementValidation(boolean placementValidation) {
-        this.placementValidation = placementValidation;
-    }
-
-    public void setShipPlacement(boolean shipPlacement) {
-        this.shipPlacement = shipPlacement;
-    }
-
-    public void setShooting(boolean shooting) {
-        this.shooting = shooting;
-    }
-
-    public void setMyTurn(boolean myTurn) {
-        this.myTurn = myTurn;
-    }
-
-    public void setThreadAndStage(ClientGameThread gameThread, Stage stage) {
-        this.gameThread = gameThread;
-        this.gameThread.setViewController(this);
-        this.stage = stage;
-        this.clientSocket = this.gameThread.getClientSocket();
-        System.out.println("Inicjalizacja gotowa");
-        this.gameThread.start();
+    public void radioSizeActivate(){
+        this.radio4.setDisable(false);
+        this.radio3.setDisable(false);
+        this.radio2.setDisable(false);
+        this.radio1.setDisable(false);
     }
 
     public void changeLoginButtonStatus(Boolean status){
@@ -291,9 +415,80 @@ public class ClientViewController implements Initializable {
     public void changeSendButtonStatus(Boolean status){
         this.sendButton.setDisable(status);
     }
+    public void changeOfferButtonStatus(Boolean status) { this.buttonOffer.setDisable(status);}
+    public void changeGamesComboStatus(Boolean status) { this.gamesCombo.setDisable(status);}
+    public void changeSizeBoxStatus(Boolean status) { this.sizeBox.setDisable(status);}
+    public void changeRemoveButtonStatus(Boolean status) { this.removeShip.setDisable(status);}
 
-    public void putInfo(String info){
-        infoArea.setText(info);
+    public void enableChat(){
+        this.chatField.setDisable(false);
+        this.sendButton.setDisable(false);
+    }
+
+    public void disableChat(){
+        this.chatField.setDisable(true);
+        this.sendButton.setDisable(true);
+    }
+
+    public void afterLoginButtons(){
+        changeCreateButtonStatus(false);
+        changeJoinButtonStatus(false);
+        this.gamesCombo.setDisable(false);
+        changeLoginButtonStatus(true);
+        this.nickField.setDisable(true);
+        this.changeOfferButtonStatus(true);
+        this.changeRemoveButtonStatus(true);
+    }
+
+    // End of GUI Activating/Deactivating methods
+
+    //Observable lists methods
+
+    public void addGameToList(String gameInfo){
+        this.gameList.add(gameInfo);
+    }
+    public void removeGameFromList(String gameInfo){
+        this.gameList.remove(gameInfo);
+    }
+
+    public void chatReceived(String msg){
+        if(this.messageList.size() <100){
+            this.messageList.add(msg);
+        }
+        else {
+            this.messageList.remove(0);
+            this.messageList.add(msg);
+            this.chatArea.refresh();
+        }
+    }
+
+    public void clearChatArea() { this.chatArea.getItems().clear();}
+
+    //End of Observable lists methods
+
+    //Setters
+    public void changeShipPlacement(Boolean status){
+        this.shipPlacement = status;
+    }
+    public void setPlacementValidation(boolean placementValidation) {
+        this.placementValidation = placementValidation;
+    }
+    public void setShipPlacement(boolean shipPlacement) {
+        this.shipPlacement = shipPlacement;
+    }
+    public void setShooting(boolean shooting) {
+        this.shooting = shooting;
+    }
+    public void setMyTurn(boolean myTurn) {
+        this.myTurn = myTurn;
+    }
+
+    public void setThreadAndStage(ClientGameThread gameThread, Stage stage) {
+        this.gameThread = gameThread;
+        this.gameThread.setViewController(this);
+        this.stage = stage;
+        this.clientSocket = this.gameThread.getClientSocket();
+        this.gameThread.start();
     }
 
     public void setMyGame(int id){
@@ -311,79 +506,30 @@ public class ClientViewController implements Initializable {
         content.setStyle("-fx-background-color: " + toRgbString(paint) + ";");
     }
 
-    private void initBoards(){
-        myBoard = new Board(event -> {
-            if(!shipPlacement)
-                return;
-            if(placementValidation){
-                setInfoColor(Color.INDIANRED);
-                putInfo("Poczekaj na odpowiedź serwera zanim postawisz kolejny statek");
-                return;
-            }
-            if(myBoard.getShipsLeft() == 0){
-                setInfoColor(Color.INDIANRED);
-                putInfo("Postawiłeś już maksymalną ilość statków !!!");
-                return;
-            }
-            ClientCell cell = (ClientCell)event.getSource();
-            if(cell.wasUsed()){
-                return;
-            }
-            myBoard.setCurrentCell(cell);
-            boolean vertical = (event.getButton() == MouseButton.PRIMARY);
-            myBoard.setCurrentVertical(vertical);
-            System.out.println(cell.getXCoordinate()+" "+cell.getYCoordinate());
-            Package pack = new Package(Command.PLACE_A_SHIP.toString(),Boolean.toString(vertical),cell.getXCoordinate(),cell.getYCoordinate(),myBoard.getCurrentPlacingSize());
-            this.clientSocket.sendMessage(pack.toString());
-            setPlacementValidation(true);
-        });
-        enemyBoard = new Board(event -> {
-            if(!shooting)
-                return;
-            if(!myTurn){
-                setInfoColor(Color.INDIANRED);
-                putInfo("Czekaj na swoją kolej !!!");
-                return;
-            }
-            ClientCell cell = (ClientCell)event.getSource();
-            if(cell.wasUsed()){
-                return;
-            }
-            System.out.println(cell.getXCoordinate()+" "+cell.getYCoordinate());
-            Package pack = new Package(Command.SHOOT.toString(),cell.getXCoordinate(),cell.getYCoordinate());
-            System.out.println(pack.toString());
-            this.clientSocket.sendMessage(pack.toString());
-        });
+    //End of setters
 
-        this.VBoxMy.getChildren().add(myBoard);
-        Label mylabel = new Label();
-        mylabel.setText("Plansza gracza");
-        mylabel.setAlignment(Pos.CENTER);
-        Label enemyLabel = new Label();
-        enemyLabel.setText("Plansza przeciwnika");
-        enemyLabel.setAlignment(Pos.CENTER);
-        this.VBoxMy.getChildren().add(mylabel);
-        this.VBoxEnemy.getChildren().add(enemyBoard);
-        this.VBoxEnemy.getChildren().add(enemyLabel);
+    /**
+     * Puts info after receiving message from server
+     */
+    public void putInfo(String info){
+        infoArea.setText(info);
     }
 
-    public void reset(){
-        this.shooting = false;
-        this.shipPlacement = false;
-        this.myTurn = false;
-        this.placementValidation = false;
-        this.myBoard.resetBoard();
-        this.enemyBoard.resetBoard();
+
+    public void offerReceived(){
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Propozycja gry");
+        alert.setHeaderText(null);
+        alert.setContentText("Przeciwnik proponuje rozpoczęcie gry. Co odpowiesz?");
+        Optional<ButtonType> action = alert.showAndWait();
+        if(action.get() == ButtonType.OK){
+            this.clientSocket.sendMessage(Command.OFFER_ACCEPT.toString());
+        }
+        else
+            this.clientSocket.sendMessage(Command.OFFER_REJECT.toString());
     }
 
-    public void afterLoginButtons(){
-        changeCreateButtonStatus(false);
-        changeJoinButtonStatus(false);
-        this.gamesCombo.setDisable(false);
-        changeLoginButtonStatus(false);
-        this.nickField.setDisable(true);
-    }
-
+    //Additional methods for changing Color into RGB String
     private String toRgbString(Color c) {
         return "rgb("
                 + to255Int(c.getRed())

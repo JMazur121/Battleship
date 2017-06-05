@@ -33,4 +33,8 @@ public class ServerCell {
         this.wasHit = true;
         return !this.ship.isAlive();
     }
+
+    public void setNull(){
+        this.ship = null;
+    }
 }

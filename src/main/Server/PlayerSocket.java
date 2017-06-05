@@ -32,13 +32,9 @@ public class PlayerSocket {
         out.close();
     }
 
-    public String receiveMessage() {
+    public String receiveMessage() throws IOException {
         String msg = null;
-        try {
-            msg = in.readLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        msg = in.readLine();
         return msg;
     }
 

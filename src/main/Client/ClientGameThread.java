@@ -63,6 +63,7 @@ public class ClientGameThread extends Thread {
                         viewController.changeExitButtonStatus(false);
                         viewController.changeJoinButtonStatus(true);
                         viewController.changeCreateButtonStatus(true);
+                        viewController.changeGamesComboStatus(true);
                     });
                 }
 
@@ -79,6 +80,7 @@ public class ClientGameThread extends Thread {
                         viewController.setInfoColor(Color.GREENYELLOW);
                         viewController.putInfo("Twoja gra została usunięta z serwera");
                         viewController.clearMyGame();
+                        viewController.afterLoginButtons();
                     });
                 }
 
@@ -87,6 +89,7 @@ public class ClientGameThread extends Thread {
                         viewController.setInfoColor(Color.GREENYELLOW);
                         viewController.putInfo("Odłączyłeś się od gry");
                         viewController.clearMyGame();
+                        viewController.afterLoginButtons();
                     });
                 }
 
@@ -102,6 +105,7 @@ public class ClientGameThread extends Thread {
                     Platform.runLater(()->{
                         viewController.setInfoColor(Color.GREENYELLOW);
                         viewController.putInfo("Gospodarz opuścił grę, teraz Ty jestes jej nowym gospodarzem");
+                        viewController.disableChat();
                     });
                 }
 
@@ -109,6 +113,7 @@ public class ClientGameThread extends Thread {
                     Platform.runLater(()->{
                         viewController.setInfoColor(Color.INDIANRED);
                         viewController.putInfo("Drugi gracz opuścił grę. Musisz zaczekać na innego przeciwnika");
+                        viewController.disableChat();
                     });
                 }
 
@@ -131,6 +136,9 @@ public class ClientGameThread extends Thread {
                         viewController.setInfoColor(Color.GREENYELLOW);
                         viewController.putInfo("Udało się dołączyć do gry");
                         viewController.setMyGame(Integer.parseInt(tmp[1]));
+                        viewController.enableChat();
+                        viewController.changeGamesComboStatus(true);
+                        viewController.changeOfferButtonStatus(false);
                     });
                 }
 
@@ -142,10 +150,20 @@ public class ClientGameThread extends Thread {
                     });
                 }
 
+                else if(command.equals(Command.REMOVE_GAME.toString())){
+                    Platform.runLater(()->{
+                        viewController.setInfoColor(Color.GREENYELLOW);
+                        viewController.putInfo(("Jedna z gier została usunięta"));
+                        viewController.removeGameFromList(tmp[1]+"#"+tmp[2]);
+                    });
+                }
+
                 else if(command.equals(Command.OPPONENT_JOINED.toString())){
                     Platform.runLater(()->{
                         viewController.setInfoColor(Color.GREENYELLOW);
                         viewController.putInfo("Przeciwnik dołączył do gry.");
+                        viewController.enableChat();
+                        viewController.changeOfferButtonStatus(false);
                     });
                 }
 
@@ -154,6 +172,9 @@ public class ClientGameThread extends Thread {
                         viewController.setInfoColor(Color.GREENYELLOW);
                         viewController.putInfo("Można rozpocząć grę. Zacznij ustawiać swoje statki");
                         viewController.changeShipPlacement(true);
+                        viewController.changeSizeBoxStatus(false);
+                        viewController.radioSizeActivate();
+                        viewController.changeRemoveButtonStatus(false);
                     });
                 }
 
@@ -162,6 +183,7 @@ public class ClientGameThread extends Thread {
                         viewController.setInfoColor(Color.INDIANRED);
                         viewController.putInfo("Nie można umieścić statku w tym miejscu");
                         viewController.setPlacementValidation(false);
+                        viewController.changeSizeBoxStatus(false);
                     });
                 }
 
@@ -170,6 +192,7 @@ public class ClientGameThread extends Thread {
                         viewController.setInfoColor(Color.GREENYELLOW);
                         viewController.putInfo("Udało się umieścić statek");
                         viewController.setPlacementValidation(false);
+                        viewController.changeSizeBoxStatus(false);
                         viewController.myBoard.placeCurrentShip();
                     });
                 }
@@ -179,8 +202,15 @@ public class ClientGameThread extends Thread {
                         viewController.setInfoColor(Color.GREENYELLOW);
                         viewController.putInfo("Wszystkie statki juz ustawione. Jeśli jesteś gotów, kliknij GOTOWY");
                         viewController.setPlacementValidation(false);
-                        viewController.radioActivate();
-                        //viewController.setShipPlacement(false);
+                    });
+                }
+
+                else if(command.equals(Command.REMOVE_OK.toString())){
+                    Platform.runLater(()->{
+                        viewController.setInfoColor(Color.GREENYELLOW);
+                        viewController.putInfo("Statek został usunięty");
+                        viewController.setPlacementValidation(false);
+                        viewController.myBoard.removeShip(Boolean.parseBoolean(tmp[1]),Integer.parseInt(tmp[2]),Integer.parseInt(tmp[3]),Integer.parseInt(tmp[4]));
                     });
                 }
 
@@ -188,6 +218,14 @@ public class ClientGameThread extends Thread {
                     Platform.runLater(()->{
                         viewController.setInfoColor(Color.GREENYELLOW);
                         viewController.putInfo("Twój przeciwnik jest juz gotowy");
+                    });
+                }
+
+                else if(command.equals(Command.OPPONENT_GIVE_UP.toString())){
+                    Platform.runLater(()->{
+                        viewController.setInfoColor(Color.GREENYELLOW);
+                        viewController.putInfo("Twój przeciwnik poddał się - wygrywasz !!!");
+                        viewController.reset();
                     });
                 }
 
@@ -299,6 +337,14 @@ public class ClientGameThread extends Thread {
                         viewController.setInfoColor(Color.INDIANRED);
                         viewController.putInfo("PRZEGRYWASZ !!!");
                         viewController.reset();
+                    });
+                }
+
+                else if(command.equals(Command.CHAT_MESSAGE.toString())){
+                    Platform.runLater(()->{
+                        viewController.setInfoColor(Color.GREENYELLOW);
+                        viewController.putInfo("Nadeszła wiadomośc");
+                        viewController.chatReceived(tmp[1]);
                     });
                 }
             }

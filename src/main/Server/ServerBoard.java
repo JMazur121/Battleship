@@ -175,4 +175,21 @@ public class ServerBoard {
         return false;
     }
 
+    public Ship removeShip(int x, int y){
+        ServerCell cell = this.getCell(x, y);
+        Point first = cell.getShip().getFirstCell();
+        Ship ship = cell.getShip();
+        if(cell.getShip().getOrientation()){//vertical
+            for(int i=first.getY(); i<first.getY()+ship.getLength(); i++){
+                this.getCell(x,i).setNull();
+            }
+        }
+        else{
+            for(int i=first.getX(); i<first.getX()+ship.getLength(); i++){
+                this.getCell(i,y).setNull();
+            }
+        }
+        return ship;
+    }
+
 }
