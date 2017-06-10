@@ -48,6 +48,7 @@ public class PlayerBoard extends Board{
         for(int i=0; i<4; i++){
             this.sizeToPlace[i].set(4-i);
         }
+        this.leftToPlace.set(10);
     }
 
     public void setCurrentCell(ClientCell currentCell) {

@@ -45,15 +45,10 @@ public class ClientSocket {
             out.close();
         }
 
-    public String receiveMessage() {
-        String msg = null;
-        try {
-            msg = in.readLine();
-            System.out.println("Message received from the server : " +msg);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+    public String receiveMessage() throws IOException {
+        String msg;
+        msg = in.readLine();
+        System.out.println("Message received from the server : " +msg);
         return msg;
     }
 }

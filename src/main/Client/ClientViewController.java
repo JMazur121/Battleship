@@ -93,9 +93,9 @@ public class ClientViewController implements Initializable {
 
     public PlayerBoard myBoard;
     public EnemyBoard enemyBoard;
-    private int myGameID = -1;
     private String myName;
-    private ClientGameThread gameThread;
+    private String myGame;
+    private GameService gameService;
     private ClientSocket clientSocket;
     private Stage stage;
 
@@ -118,6 +118,7 @@ public class ClientViewController implements Initializable {
         this.joinButton.setDisable(true);
         this.sendButton.setDisable(true);
         this.buttonOffer.setDisable(true);
+        this.removeShip.setDisable(true);
         this.gameList = FXCollections.observableArrayList();
         this.messageList = FXCollections.observableArrayList();
         this.gamesCombo.setItems(this.gameList);
@@ -132,6 +133,9 @@ public class ClientViewController implements Initializable {
 
         this.radioReady.setOnMouseClicked(event -> {
             this.clientSocket.sendMessage(Command.READY.toString());
+            this.radioDeactivate();
+            this.changeRemoveButtonStatus(true);
+            this.shipPlacement = false;
         });
         this.radioPlacement.setSelected(true);
         this.radio4.setUserData(4);
@@ -149,8 +153,6 @@ public class ClientViewController implements Initializable {
         this.radioSizeDeactivate();
         this.sizeBox.setDisable(true);
         initBoards();
-        Image minus = new Image(getClass().getResourceAsStream("/src/main/Utils/minus.png"));
-        this.removeShip.setGraphic(new ImageView(minus));
         this.removeToggleAction();
     }
 
@@ -259,6 +261,9 @@ public class ClientViewController implements Initializable {
         this.radioSizeActivate();
         this.sizeBox.setDisable(true);
         this.radioDeactivate();
+        this.buttonGiveUp.setDisable(true);
+        this.removeShip.setDisable(true);
+        this.radioPlacement.setSelected(true);
     }
 
     public void setNewSizeRadio(){
@@ -267,6 +272,7 @@ public class ClientViewController implements Initializable {
             if(((RadioButton)t).isDisabled())
                 continue;
             t.setSelected(true);
+            ((RadioButton) t).requestFocus();
         }
     }
 
@@ -281,6 +287,14 @@ public class ClientViewController implements Initializable {
             Package pack = new Package(Command.LOGIN.toString(), this.nickField.getText());
             this.clientSocket.sendMessage(pack.toString());
             this.myName = this.nickField.getText();
+        }
+
+        else {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Błąd");
+            alert.setHeaderText("Błędny login");
+            alert.setContentText("Pole z nazwą nie może pozostać puste!!!");
+            alert.showAndWait();
         }
 
     }
@@ -322,8 +336,8 @@ public class ClientViewController implements Initializable {
         }
 
         else{
-            String tmp[] = this.gamesCombo.getSelectionModel().getSelectedItem().split("#");
-            Package pack = new Package(Command.JOIN_TO_GAME.toString(),tmp[0]);
+            String tmp = this.gamesCombo.getSelectionModel().getSelectedItem();
+            Package pack = new Package(Command.JOIN_TO_GAME.toString(),tmp);
             System.out.println(pack.toString());
             this.clientSocket.sendMessage(pack.toString());
         }
@@ -331,7 +345,26 @@ public class ClientViewController implements Initializable {
 
     @FXML
     private void createGame(ActionEvent event){
-        this.clientSocket.sendMessage(Command.CREATE_GAME.toString());
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Nazwa gry");
+        dialog.setHeaderText("Wprowadzanie nazwy");
+        dialog.setContentText("Podaj nazwę nowej gry:");
+
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()){
+            String res = result.get();
+            if(res.isEmpty()){
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Błąd");
+                alert.setHeaderText("Błędna nazwa");
+                alert.setContentText("Pole z nazwą nie może pozostać puste!!!");
+                alert.showAndWait();
+            }
+            else {
+                Package pack = new Package(Command.CREATE_GAME.toString(), res);
+                this.clientSocket.sendMessage(pack.toString());
+            }
+        }
     }
 
     @FXML
@@ -412,9 +445,6 @@ public class ClientViewController implements Initializable {
     public void changeExitButtonStatus(Boolean status){
         this.exitButton.setDisable(status);
     }
-    public void changeSendButtonStatus(Boolean status){
-        this.sendButton.setDisable(status);
-    }
     public void changeOfferButtonStatus(Boolean status) { this.buttonOffer.setDisable(status);}
     public void changeGamesComboStatus(Boolean status) { this.gamesCombo.setDisable(status);}
     public void changeSizeBoxStatus(Boolean status) { this.sizeBox.setDisable(status);}
@@ -437,7 +467,8 @@ public class ClientViewController implements Initializable {
         changeLoginButtonStatus(true);
         this.nickField.setDisable(true);
         this.changeOfferButtonStatus(true);
-        this.changeRemoveButtonStatus(true);
+        this.changeDeleteButtonStatus(true);
+        this.changeExitButtonStatus(true);
     }
 
     // End of GUI Activating/Deactivating methods
@@ -483,21 +514,27 @@ public class ClientViewController implements Initializable {
         this.myTurn = myTurn;
     }
 
-    public void setThreadAndStage(ClientGameThread gameThread, Stage stage) {
-        this.gameThread = gameThread;
-        this.gameThread.setViewController(this);
+    public void setServiceAndStage(GameService service, Stage stage) {
+        this.gameService = service;
+        this.gameService.setViewController(this);
         this.stage = stage;
-        this.clientSocket = this.gameThread.getClientSocket();
-        this.gameThread.start();
+        this.clientSocket = this.gameService.getClientSocket();
+        this.gameService.start();
+        this.stage.setOnCloseRequest((event)->{
+            this.clientSocket.sendMessage(Command.CLIENT_CLOSE.toString());
+            this.gameService.cancel();
+            this.clientSocket.close();
+            System.exit(0);
+        });
     }
 
-    public void setMyGame(int id){
-        this.myGameID = id;
-        this.yourgameField.setText("ID gry : " + Integer.toString(this.myGameID));
+    public void setMyGame(String name){
+        this.myGame = name;
+        this.yourgameField.setText("ID gry : " + this.myGame);
     }
 
     public void clearMyGame(){
-        this.myGameID = -1;
+        this.myGame = null;
         this.yourgameField.clear();
     }
 

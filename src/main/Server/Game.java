@@ -8,7 +8,7 @@ import main.Utils.Package;
  * Created by Jakub on 2017-05-20.
  */
 public class Game {
-    private int gameID;
+    private String gameName;
     private Player host = null;
     private Player guest = null;
     private Player currentPlayer = null;
@@ -20,8 +20,8 @@ public class Game {
     private boolean hostReady = false;
     private boolean guestReady = false;
 
-    public Game(int ID, Player player) {
-        this.gameID = ID;
+    public Game(String name, Player player) {
+        this.gameName = name;
         this.host = player;
         hostBoard = new ServerBoard();
         guestBoard = new ServerBoard();
@@ -41,7 +41,7 @@ public class Game {
             return guestShipsToPlace;
     }
 
-    public boolean isGameActive() {
+    public synchronized boolean isGameActive() {
         return this.isGameActive;
     }
 
@@ -51,13 +51,7 @@ public class Game {
 
     public Player getGuest() {return this.guest;}
 
-    public int getGameID() {
-        return this.gameID;
-    }
-
-    public String getInfo() {
-        return Integer.toString(this.getGameID()) + "#" + this.getHost().getUserName();
-    }
+    public synchronized String getGameName() {return this.gameName;}
 
     public void setHost(Player host) {
         this.host = host;
@@ -67,7 +61,7 @@ public class Game {
         this.guest = guest;
     }
 
-    private void reset(){
+    public void reset(){
         this.hostBoard.initializeBoard();
         this.guestBoard.initializeBoard();
         this.hostShipsToPlace = 10;
@@ -98,7 +92,7 @@ public class Game {
 
     public void addPlayer(Player player) {
         this.guest = player;
-        this.guest.sendToPlayer(Command.JOINED.toString() + "#" + this.getGameID());
+        this.guest.sendToPlayer(Command.JOINED.toString() + "#" + this.getGameName());
         this.host.sendToPlayer(Command.OPPONENT_JOINED.toString());
     }
 
@@ -160,6 +154,10 @@ public class Game {
     synchronized public void removeShip(Player p,int x, int y){
         ServerBoard board = this.getPlayerBoard(p);
         Ship removed = board.removeShip(x, y);
+        if(p == this.host)
+            this.hostShipsToPlace++;
+        else
+            this.guestShipsToPlace++;
         Package pack = new Package(Command.REMOVE_OK.toString(),Boolean.toString(removed.getOrientation()),removed.getFirstCell().getX(),removed.getFirstCell().getY(),removed.getLength());
         p.sendToPlayer(pack.toString());
     }
@@ -167,7 +165,7 @@ public class Game {
     public void shoot(Player shooter,int x, int y){
         Player opponent = this.getOpponent(shooter);
         ServerBoard opponentBoard = this.getPlayerBoard(opponent);
-        Server.getInstance().printLog(shooter.getUserName() + ","+opponent.getUserName());
+        //Server.getInstance().printLog(shooter.getUserName() + ","+opponent.getUserName());
         if(opponentBoard.checkIfMissed(x,y)){//missed
             shooter.sendToPlayer(Command.MISSED_NOT_YOUR_TURN.toString()+"#"+x+"#"+y);
             opponent.sendToPlayer(Command.OPPONENT_MISSED_YOUR_TURN.toString()+"#"+x+"#"+y);

@@ -65,7 +65,6 @@
                         <Font size="12.0" />
                      </font>
                   </Button>
-                  <Button fx:id="buttonGiveUp" mnemonicParsing="false" onAction="#giveUp" prefHeight="22.0" prefWidth="225.0" text="Poddaj się" />
                   <Button fx:id="exitButton" mnemonicParsing="false" onAction="#abandonGame" prefHeight="23.0" prefWidth="225.0" text="Opuść grę">
                      <font>
                         <Font size="12.0" />
@@ -122,6 +121,7 @@
                         <Label prefHeight="43.0" prefWidth="58.0" text="Usuń statek" />
                      </children>
                   </HBox>
+                  <Button fx:id="buttonGiveUp" mnemonicParsing="false" onAction="#giveUp" prefHeight="22.0" prefWidth="140.0" text="Poddaj się" />
                </children></VBox>
          </children>
       </HBox>

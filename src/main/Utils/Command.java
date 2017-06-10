@@ -7,6 +7,7 @@ public enum Command {
     LOGIN,
     LOGIN_SUCCEED,
     NAME_NOT_AVAILABLE,
+    GAME_NAME_NOT_AVAILABLE,
     AVAILABLE_GAME,
     CREATE_GAME,
     GAME_HAS_ALREADY_2_PLAYERS,
@@ -50,5 +51,6 @@ public enum Command {
     HIT_SHOOT_AGAIN,
     HIT_AND_SINK,
     PLAYER_HINT,
-    CHAT_MESSAGE
+    CHAT_MESSAGE,
+    CLIENT_CLOSE
 }

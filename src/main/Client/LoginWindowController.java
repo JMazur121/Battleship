@@ -26,11 +26,11 @@ public class LoginWindowController implements Initializable{
     @FXML
     private Button connectButton;
 
-    private ClientGameThread thread;
+    private GameService service;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        thread = new ClientGameThread();
+        service = new GameService();
 
     }
     @FXML
@@ -51,14 +51,14 @@ public class LoginWindowController implements Initializable{
             alert.showAndWait();
             return;
         }
-        boolean result = this.thread.tryConnect(address,port);
+        boolean result = this.service.tryConnect(address,port);
         if(result){
             Stage stage;
             stage = (Stage) this.connectButton.getScene().getWindow();
             FXMLLoader loader = new FXMLLoader(getClass().getResource("ClientView.fxml"));
             Parent root = (Parent) loader.load();
             ClientViewController clientController = loader.getController();
-            clientController.setThreadAndStage(this.thread,stage);
+            clientController.setServiceAndStage(this.service,stage);
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.setResizable(false);

@@ -28,7 +28,7 @@ public class Player extends Thread {
         System.out.println("Player started...");
         try {
             this.socket.connect();
-            while(true){
+            loop : while(true){
                 String received = this.socket.receiveMessage();
                 if (received != null) {
                     String tmp[] = received.split("#");
@@ -43,7 +43,7 @@ public class Player extends Thread {
                             //send available games
                             for (Game game : Server.getInstance().getGames()) {
                                 String info = Command.AVAILABLE_GAME.toString();
-                                info = info + "#" + game.getInfo();
+                                info = info + "#" + game.getGameName();
                                 sendToPlayer(info);
                             }
                         } else {
@@ -52,9 +52,16 @@ public class Player extends Thread {
                     }
                     else if (command.equals("CREATE_GAME")) {
                         resetPlayer();
-                        game = new Game(Server.getInstance().getNextGameID(), this);
-                        Server.getInstance().addGame(game);
-                        sendToPlayer(Command.WAIT_FOR_OPPONENT.toString() + "#" + game.getGameID());
+                        String name = tmp[1];
+                        if(Server.getInstance().checkGameNameAvailability(name)) {
+                            Game game = new Game(name,this);
+                            Server.getInstance().addGame(game);
+                            this.game = game;
+                            sendToPlayer(Command.WAIT_FOR_OPPONENT.toString() + "#" + name);
+                        }
+                        else {
+                            sendToPlayer(Command.GAME_NAME_NOT_AVAILABLE.toString());
+                        }
                     }
 
                     else if(command.equals("ABANDON_GAME")){
@@ -64,19 +71,23 @@ public class Player extends Thread {
                                 guest.sendToPlayer(Command.HOST_CHANGE.toString());
                                 this.game.setHost(guest);
                                 this.game.setGuest(null);
+                                this.game.reset();
+                                this.resetPlayer();
                                 this.sendToPlayer(Command.ABANDON_OK.toString());
                             }
                             else {
+                                Server.getInstance().deleteGame(this.game);
                                 this.sendToPlayer(Command.GAME_ABANDON_AND_DELETED.toString());
                                 this.resetPlayer();
-                                Server.getInstance().deleteGame(this.game);
                             }
                         }
                         else {
                             Player host = this.game.getHost();
+                            this.game.setGuest(null);
+                            this.game.reset();
                             host.sendToPlayer(Command.OPPONENT_EXIT.toString());
                             this.sendToPlayer(Command.ABANDON_OK.toString());
-                            this.game.setGuest(null);
+                            this.resetPlayer();
                         }
                     }
 
@@ -94,8 +105,7 @@ public class Player extends Thread {
                     }
                     else if (command.equals("JOIN_TO_GAME")) {
                         resetPlayer();
-                        int index = Integer.parseInt(tmp[1]);
-                        Game toJoin = Server.getInstance().findGame(index);
+                        Game toJoin = Server.getInstance().findGame(tmp[1]);
                         if (toJoin != null) {
                             if (toJoin.hasTwoPlayers()) {
                                 sendToPlayer(Command.GAME_HAS_ALREADY_2_PLAYERS.toString());
@@ -109,19 +119,22 @@ public class Player extends Thread {
                     }
 
                     else if(command.equals("INVITATION")){
-                        if(!this.game.isGameActive() && this.game.hasTwoPlayers()) {
-                            Player opponent = this.game.getOpponent(this);
-                            opponent.sendToPlayer(Command.INVITATION.toString());
+                        Server.getInstance().printLog("Jestem w tum zaproszeniu");
+                        if(!this.game.isGameActive()) {
+                            this.game.getOpponent(this).sendToPlayer(Command.INVITATION.toString());
                         }
                     }
 
                     else if(command.equals("OFFER_ACCEPT")){
-                        this.game.startGame(this.game.getOpponent(this));
+                        if(!this.game.isGameActive()) {
+                            this.game.startGame(this.game.getOpponent(this));
+                        }
                     }
 
                     else if(command.equals("OFFER_REJECT")){
-                        Player opponent = this.game.getOpponent(this);
-                        opponent.sendToPlayer(Command.OFFER_REJECT.toString());
+                        if(!this.game.isGameActive()) {
+                            this.game.getOpponent(this).sendToPlayer(Command.OFFER_REJECT.toString());
+                        }
                     }
 
                     else if(command.equals("GIVE_UP")){
@@ -169,13 +182,38 @@ public class Player extends Thread {
                             e.printStackTrace();
                         }
                     }
+
+                    else if(command.equals("CLIENT_CLOSE")){
+                        this.isConnected = false;
+                        if(this.game != null) {
+                            if (this == game.getHost()) {
+                                Player guest = this.game.getGuest();
+                                if (guest != null) {
+                                    guest.sendToPlayer(Command.HOST_CHANGE.toString());
+                                    this.game.setHost(guest);
+                                    this.game.setGuest(null);
+                                    this.game.reset();
+                                } else {
+                                    Server.getInstance().deleteGame(this.game);
+                                }
+                            } else {
+                                Player host = this.game.getHost();
+                                host.sendToPlayer(Command.OPPONENT_EXIT.toString());
+                                this.game.setGuest(null);
+                                this.game.reset();
+                            }
+                        }
+                        break loop;
+                    }
                 }
-                Thread.sleep(50);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            this.isConnected = false;
         } finally {
             this.socket.close();
+            Server.getInstance().printLog("Jestem tutaj");
+            Server.getInstance().deleteName(this.userName);
+            Server.getInstance().deletePlayer(this);
         }
     }
 
@@ -188,5 +226,7 @@ public class Player extends Thread {
     public void resetPlayer() {
         game = null;
     }
+
+    public boolean isConnected() { return this.isConnected;}
 
 }

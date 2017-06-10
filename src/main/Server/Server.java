@@ -16,7 +16,6 @@ public class Server extends Thread {
     private ArrayList<Player> players;
     private ArrayList<Game> createdGames;
     private HashSet<String> userNames;
-    private int gameID = 1;
 
     public void run(){
         createdGames = new ArrayList<Game>();
@@ -45,28 +44,31 @@ public class Server extends Thread {
     public synchronized void addGame(Game game) {
         instance.createdGames.add(game);
         String info = Command.AVAILABLE_GAME.toString();
-        info = info + "#" + game.getInfo();
+        info = info + "#" + game.getGameName();
         instance.sendBroadcast(info);
     }
 
     public synchronized void addName(String name) {instance.userNames.add(name);}
 
+    public synchronized void deleteName(String name) {instance.userNames.remove(name);}
+
     public synchronized void deleteGame(Game game) {
         instance.createdGames.remove(game);
         String info = Command.REMOVE_GAME.toString();
-        info = info + "#" + game.getInfo();
+        info = info + "#" + game.getGameName();
         instance.sendBroadcast(info);
     }
 
-    public synchronized Game findGame(int gameID) {
-        int index = -1;
+    public synchronized void deletePlayer(Player player){
+        instance.players.remove(player);
+    }
+
+    public synchronized Game findGame(String name) {
         for (Game game: instance.createdGames) {
-            if (game.getGameID() == gameID)
-                index = instance.createdGames.indexOf(game);
+            if (game.getGameName().equals(name))
+                return game;
         }
-        if(index == -1)
-            return null;
-        return instance.createdGames.get(index);
+        return null;
     }
 
     public static Server getInstance() {
@@ -89,16 +91,20 @@ public class Server extends Thread {
         return available;
     }
 
-    synchronized public void printLog(String log){System.out.println(log);}
-
-    public synchronized int getNextGameID() {
-        gameID++;
-        return gameID - 1;
+    public synchronized boolean checkGameNameAvailability(String name){
+        boolean available = true;
+        for (Game g: this.instance.createdGames) {
+            if(g.getGameName().equals(name))
+                available = false;
+        }
+        return available;
     }
+
+    synchronized public void printLog(String log){System.out.println(log);}
 
     private void sendBroadcast(String message){
         for (Player p: instance.players) {
-            if(p.getUserName() != null)
+            if(p.getUserName() != null && p.isConnected())
                 p.sendToPlayer(message);
         }
     }
