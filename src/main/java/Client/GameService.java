@@ -1,11 +1,10 @@
-package main.Client;
+package main.java.Client;
 
 import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.scene.paint.Color;
-import main.Server.Player;
-import main.Utils.Command;
+import main.java.Utils.Command;
 
 public class GameService extends Service<Void> {
     public ClientViewController viewController;
@@ -81,6 +80,7 @@ public class GameService extends Service<Void> {
                                     viewController.disableChat();
                                     viewController.afterLoginButtons();
                                     viewController.reset();
+                                    viewController.clearChatArea();
                                 });
                             } else if (command.equals(Command.GAME_DELETED.toString())) {
                                 Platform.runLater(() -> {
@@ -88,6 +88,7 @@ public class GameService extends Service<Void> {
                                     viewController.putInfo("Twoja gra została usunięta z serwera");
                                     viewController.clearMyGame();
                                     viewController.disableChat();
+                                    viewController.clearChatArea();
                                     viewController.afterLoginButtons();
                                     viewController.reset();
                                 });
@@ -99,6 +100,7 @@ public class GameService extends Service<Void> {
                                     viewController.reset();
                                     viewController.afterLoginButtons();
                                     viewController.disableChat();
+                                    viewController.clearChatArea();
                                 });
                             } else if (command.equals(Command.GAME_ABANDON_AND_DELETED.toString())) {
                                 Platform.runLater(() -> {
@@ -108,12 +110,14 @@ public class GameService extends Service<Void> {
                                     viewController.afterLoginButtons();
                                     viewController.reset();
                                     viewController.disableChat();
+                                    viewController.clearChatArea();
                                 });
                             } else if (command.equals(Command.HOST_CHANGE.toString())) {
                                 Platform.runLater(() -> {
                                     viewController.setInfoColor(Color.GREENYELLOW);
                                     viewController.putInfo("Gospodarz opuścił grę, teraz Ty jestes jej nowym gospodarzem");
                                     viewController.disableChat();
+                                    viewController.clearChatArea();
                                     viewController.reset();
                                     viewController.changeDeleteButtonStatus(false);
                                     viewController.changeOfferButtonStatus(true);
@@ -123,6 +127,7 @@ public class GameService extends Service<Void> {
                                     viewController.setInfoColor(Color.INDIANRED);
                                     viewController.putInfo("Drugi gracz opuścił grę. Musisz zaczekać na innego przeciwnika");
                                     viewController.disableChat();
+                                    viewController.clearChatArea();
                                     viewController.reset();
                                     viewController.changeOfferButtonStatus(true);
                                 });

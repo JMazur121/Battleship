@@ -1,12 +1,9 @@
-package main.Server;
+package main.java.Server;
 
-import main.Utils.Command;
-import main.Utils.Point;
-import main.Utils.Package;
+import main.java.Utils.Command;
+import main.java.Utils.Package;
+import main.java.Utils.Point;
 
-/**
- * Created by Jakub on 2017-05-20.
- */
 public class Game {
     private String gameName;
     private Player host = null;

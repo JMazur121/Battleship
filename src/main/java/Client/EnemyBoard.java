@@ -1,4 +1,4 @@
-package main.Client;
+package main.java.Client;
 
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;

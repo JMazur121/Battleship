@@ -1,4 +1,4 @@
-package main.Client;
+package main.java.Client;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -7,14 +7,12 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.scene.control.RadioButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
 /**
  * Created by Jakub on 2017-06-04.
  */
-public class PlayerBoard extends Board{
+public class PlayerBoard extends Board {
     private int currentPlacingSize = 4;
     private boolean isCurrentVertical = true;
     private ClientCell currentCell;

@@ -1,8 +1,5 @@
-package main.Server;
+package main.java.Server;
 
-/**
- * Created by Jakub on 2017-05-20.
- */
 public class ServerCell {
     private Ship ship = null;
     private boolean wasHit = false;

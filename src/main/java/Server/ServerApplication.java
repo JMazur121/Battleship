@@ -1,6 +1,4 @@
-package main.Server;/**
- * Created by Jakub on 2017-05-27.
- */
+package main.java.Server;
 
 import javafx.application.Application;
 import javafx.stage.Stage;

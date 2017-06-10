@@ -1,17 +1,14 @@
-package main.Server;
+package main.java.Server;
 
-import main.Utils.Point;
+import main.java.Utils.Point;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Jakub on 2017-05-20.
- */
 public class ServerBoard {
     private int unitsLeft = 10;
     private static final int boardsize = 10;
-    private ServerCell [][] board = null;
+    private ServerCell[][] board = null;
 
     public ServerBoard(){
         initializeBoard();
@@ -37,7 +34,7 @@ public class ServerBoard {
         this.unitsLeft = 10;
     }
 
-    public ServerCell getCell(int x,int y){
+    public ServerCell getCell(int x, int y){
         return this.board[y][x];
     }
 
@@ -57,7 +54,7 @@ public class ServerBoard {
      * @param vertical defines if ship orientation is vertical(true) or horizontal(false)
      * @return  array of cells adjacent to ship cells
      */
-    private ServerCell[] getShipNeighbours(int x,int y,int length,boolean vertical){
+    private ServerCell[] getShipNeighbours(int x, int y, int length, boolean vertical){
         List<ServerCell> neighbours = new ArrayList<>();
         int tempx,tempy;
         if(vertical){
@@ -104,7 +101,7 @@ public class ServerBoard {
      * @param  x x coordinate for most bottom ship cell (if vertical) or coordinate for most left cell(if horizontal)
      * @param  y y coordinate for most bottom ship cell (if vertical) or coordinate for most left cell(if horizontal)
      */
-    private boolean isPlacementPossible(Ship shipToPlace,int x,int y){
+    private boolean isPlacementPossible(Ship shipToPlace, int x, int y){
         int length = shipToPlace.getLength();
         //check vertical orientation
         if (shipToPlace.getOrientation()) {
@@ -157,7 +154,7 @@ public class ServerBoard {
         return !(this.unitsLeft > 0);
     }
 
-    public boolean placeShip(Ship shipToPlace,int x,int y){
+    public boolean placeShip(Ship shipToPlace, int x, int y){
         if(isPlacementPossible(shipToPlace, x, y)){
             shipToPlace.setFirstCell(x,y);
             if(shipToPlace.getOrientation()){ //== vertical

@@ -1,12 +1,4 @@
-package main.Client;
-
-/**
- * Created by Jakub on 2017-05-20.
- */
-
-import java.net.URL;
-import java.util.Optional;
-import java.util.ResourceBundle;
+package main.java.Client;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -14,29 +6,23 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.*;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import main.Utils.Command;
-import main.Utils.Package;
-import javafx.scene.image.Image;
+import main.java.Utils.Command;
+import main.java.Utils.Package;
 
-/**
- * FXML Controller class
- *
- * @author Jakub
- */
+import java.net.URL;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
+import java.util.ResourceBundle;
+
 public class ClientViewController implements Initializable {
 
     @FXML
@@ -483,12 +469,13 @@ public class ClientViewController implements Initializable {
     }
 
     public void chatReceived(String msg){
+        String message = this.time() + " " + msg;
         if(this.messageList.size() <100){
-            this.messageList.add(msg);
+            this.messageList.add(message);
         }
         else {
             this.messageList.remove(0);
-            this.messageList.add(msg);
+            this.messageList.add(message);
             this.chatArea.refresh();
         }
     }
@@ -577,6 +564,13 @@ public class ClientViewController implements Initializable {
 
     private int to255Int(double d) {
         return (int) (d * 255);
+    }
+
+    //Local time method
+    private String time(){
+        LocalTime today = LocalTime.now();
+        String result = today.format(DateTimeFormatter.ISO_LOCAL_TIME);
+        return result;
     }
 }
 

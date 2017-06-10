@@ -1,4 +1,4 @@
-package main.Client;
+package main.java.Client;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -55,7 +55,7 @@ public class LoginWindowController implements Initializable{
         if(result){
             Stage stage;
             stage = (Stage) this.connectButton.getScene().getWindow();
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("ClientView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/src/main/resources/ClientView.fxml"));
             Parent root = (Parent) loader.load();
             ClientViewController clientController = loader.getController();
             clientController.setServiceAndStage(this.service,stage);

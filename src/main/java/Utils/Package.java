@@ -1,6 +1,4 @@
-package main.Utils;
-
-import com.sun.xml.internal.bind.v2.runtime.reflect.Lister;
+package main.java.Utils;
 
 /**
  * Created by Jakub on 2017-05-23.

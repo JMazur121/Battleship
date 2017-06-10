@@ -1,17 +1,9 @@
-package main.Server;
+package main.java.Server;
 
-import javafx.application.Platform;
-import main.Utils.Command;
+import main.java.Utils.Command;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.Socket;
 
-/**
- * Created by Jakub on 2017-05-20.
- */
 public class Player extends Thread {
     private String userName = null;
     private PlayerSocket socket;

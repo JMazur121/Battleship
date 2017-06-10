@@ -1,8 +1,6 @@
-package main.Server;
+package main.java.Server;
 
-import main.Utils.Point;
-
-import java.util.ArrayList;
+import main.java.Utils.Point;
 
 /**
  * Created by Jakub on 2017-05-15.

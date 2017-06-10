@@ -1,22 +1,12 @@
-package main.Client;
+package main.java.Client;
 
-import com.sun.deploy.util.SessionState;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.EventHandler;
 import javafx.scene.Parent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import main.Utils.Point;
 
-import java.util.ArrayList;
-import java.util.List;
-
-/**
- * Created by Jakub on 2017-05-20.
- */
 public class Board extends Parent {
     protected VBox rows = new VBox();
     protected static final int boardsize = 10;
@@ -34,7 +24,7 @@ public class Board extends Parent {
         this.getChildren().add(rows);
     }
 
-    public ClientCell getCell(int x,int y){
+    public ClientCell getCell(int x, int y){
         return (ClientCell)((HBox)rows.getChildren().get(y)).getChildren().get(x);
     }
 

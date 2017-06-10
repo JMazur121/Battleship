@@ -1,15 +1,12 @@
-package main.Server;
+package main.java.Server;
 
-import main.Utils.Command;
+import main.java.Utils.Command;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-/**
- * Created by Jakub on 2017-05-21.
- */
 public class Server extends Thread {
     private static Server instance = null;
     private final int port = 8765;
@@ -26,6 +23,7 @@ public class Server extends Thread {
             System.out.println("Server is running...");
             listener = new ServerSocket(port);
             while (true){
+                System.out.println("Tak");
                 Player newPlayer = new Player(listener.accept());
                 newPlayer.start();
                 players.add(newPlayer);

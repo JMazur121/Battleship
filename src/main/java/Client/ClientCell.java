@@ -1,12 +1,9 @@
-package main.Client;
+package main.java.Client;
 
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import main.Utils.Point;
+import main.java.Utils.Point;
 
-/**
- * Created by Jakub on 2017-05-20.
- */
 public class ClientCell extends Rectangle {
     private final Point position;
     private boolean wasUsed = false;

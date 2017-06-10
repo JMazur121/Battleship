@@ -1,7 +1,4 @@
-package main.Client;
-/**
- * Created by Jakub on 2017-05-24.
- */
+package main.java.Client;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -19,7 +16,7 @@ public class ClientApplication extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("LoginWindow.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/src/main/resources/LoginWindow.fxml"));
         primaryStage.setTitle("Statki");
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
