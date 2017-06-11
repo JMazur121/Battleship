@@ -1,18 +1,13 @@
-package main.java.Server;
+package main.java.Server.Model;
 
 public class ServerCell {
     private Ship ship = null;
-    private boolean wasHit = false;
 
     public ServerCell() {
     }
 
     public void placeShip(Ship s){
         this.ship = s;
-    }
-
-    boolean wasHit(){
-        return this.wasHit;
     }
 
     boolean isShip() {
@@ -27,8 +22,7 @@ public class ServerCell {
 
     public boolean shoot(){
         this.ship.damage();
-        this.wasHit = true;
-        return !this.ship.isAlive();
+        return (!(this.ship.isAlive()));
     }
 
     public void setNull(){

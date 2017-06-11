@@ -1,5 +1,6 @@
-package main.java.Server;
+package main.java.Server.Model;
 
+import main.java.Server.Player;
 import main.java.Utils.Command;
 import main.java.Utils.Package;
 import main.java.Utils.Point;
@@ -29,13 +30,6 @@ public class Game {
             currentPlayer = guest;
         else
             currentPlayer = host;
-    }
-
-    public int getShipsToPlace(Player player) {
-        if(player == host)
-            return hostShipsToPlace;
-        else
-            return guestShipsToPlace;
     }
 
     public synchronized boolean isGameActive() {
@@ -181,7 +175,9 @@ public class Game {
                     opponent.sendToPlayer(Command.OPPONENT_HIT_AND_SINK.toString()+"#"+x+"#"+y);
                     Ship wreck = opponentBoard.getCell(x,y).getShip();
                     Point firstCell = wreck.getFirstCell();
-                    shooter.sendToPlayer(Command.PLAYER_HINT.toString()+"#"+firstCell.getX()+"#"+firstCell.getY()+"#"+wreck.getLength()+"#"+wreck.getOrientation());
+                    //shooter.sendToPlayer(Command.PLAYER_HINT.toString()+"#"+firstCell.getX()+"#"+firstCell.getY()+"#"+wreck.getLength()+"#"+wreck.getOrientation());
+                    Package pack = new Package(Command.PLAYER_HINT.toString(),Boolean.toString(wreck.getOrientation()),firstCell.getX(),firstCell.getY(),wreck.getLength());
+                    shooter.sendToPlayer(pack.toString());
                 }
 
             }

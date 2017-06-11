@@ -1,5 +1,7 @@
 package main.java.Server;
 
+import javafx.application.Platform;
+import main.java.Server.Model.Game;
 import main.java.Utils.Command;
 
 import java.io.IOException;
@@ -9,34 +11,53 @@ import java.util.HashSet;
 
 public class Server extends Thread {
     private static Server instance = null;
-    private final int port = 8765;
+    private int port;
     private ArrayList<Player> players;
     private ArrayList<Game> createdGames;
     private HashSet<String> userNames;
+    private ServerViewController controller;
+    private ServerSocket listener;
 
     public void run(){
         createdGames = new ArrayList<Game>();
         players = new ArrayList<Player>();
         userNames = new HashSet<String>();
-        ServerSocket listener = null;
+        listener = null;
         try {
-            System.out.println("Server is running...");
             listener = new ServerSocket(port);
+            Platform.runLater(()->{
+                this.controller.updatePlayers(players.size());
+            });
             while (true){
-                System.out.println("Tak");
                 Player newPlayer = new Player(listener.accept());
                 newPlayer.start();
                 players.add(newPlayer);
+                Platform.runLater(()->{
+                    this.controller.updatePlayers(players.size());
+                });
             }
         } catch (IOException e) {
-            e.printStackTrace();
         } finally {
             try {
                 listener.close();
             } catch (IOException e) {
-                e.printStackTrace();
             }
         }
+    }
+
+    public void kill(){
+        try {
+            this.listener.close();
+        } catch (IOException e) {
+        }
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public void setController(ServerViewController controller) {
+        this.controller = controller;
     }
 
     public synchronized void addGame(Game game) {
@@ -46,9 +67,13 @@ public class Server extends Thread {
         instance.sendBroadcast(info);
     }
 
-    public synchronized void addName(String name) {instance.userNames.add(name);}
+    public synchronized void addName(String name) {
+        instance.userNames.add(name);
+    }
 
-    public synchronized void deleteName(String name) {instance.userNames.remove(name);}
+    public synchronized void deleteName(String name) {
+        instance.userNames.remove(name);
+    }
 
     public synchronized void deleteGame(Game game) {
         instance.createdGames.remove(game);
@@ -59,6 +84,9 @@ public class Server extends Thread {
 
     public synchronized void deletePlayer(Player player){
         instance.players.remove(player);
+        Platform.runLater(()->{
+            this.controller.updatePlayers(players.size());
+        });
     }
 
     public synchronized Game findGame(String name) {
@@ -98,11 +126,9 @@ public class Server extends Thread {
         return available;
     }
 
-    synchronized public void printLog(String log){System.out.println(log);}
-
-    private void sendBroadcast(String message){
+    public void sendBroadcast(String message){
         for (Player p: instance.players) {
-            if(p.getUserName() != null && p.isConnected())
+            if(p.isConnected())
                 p.sendToPlayer(message);
         }
     }

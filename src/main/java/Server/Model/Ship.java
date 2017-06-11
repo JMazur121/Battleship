@@ -1,10 +1,7 @@
-package main.java.Server;
+package main.java.Server.Model;
 
 import main.java.Utils.Point;
 
-/**
- * Created by Jakub on 2017-05-15.
- */
 public class Ship {
     private final int length;
     private int hitpoints;
@@ -21,16 +18,12 @@ public class Ship {
         return vertorientation;
     }
 
-    public void setOrientation(boolean orientation) {
-        this.vertorientation = orientation;
-    }
-
     public int getLength() {
         return length;
     }
 
     public boolean isAlive(){
-        return this.hitpoints > 0;
+        return (this.hitpoints > 0);
     }
 
     public void damage(){

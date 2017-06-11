@@ -1,12 +1,9 @@
-package main.java.Client;
+package main.java.Client.Model;
 
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 
-/**
- * Created by Jakub on 2017-06-04.
- */
 public class EnemyBoard extends Board {
 
     public EnemyBoard(EventHandler<? super MouseEvent> mouseClickHandler) {

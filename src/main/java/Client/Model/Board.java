@@ -1,4 +1,4 @@
-package main.java.Client;
+package main.java.Client.Model;
 
 import javafx.event.EventHandler;
 import javafx.scene.Parent;

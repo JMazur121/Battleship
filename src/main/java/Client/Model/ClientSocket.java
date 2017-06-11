@@ -1,4 +1,4 @@
-package main.java.Client;
+package main.java.Client.Model;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,9 +8,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-/**
- * Created by Jakub on 2017-05-27.
- */
 public class ClientSocket {
     private Socket socket;
     private PrintWriter out;

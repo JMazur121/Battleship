@@ -1,5 +1,7 @@
 package main.java.Server;
 
+import main.java.Server.Model.Game;
+import main.java.Server.Model.PlayerSocket;
 import main.java.Utils.Command;
 
 import java.net.Socket;
@@ -12,12 +14,10 @@ public class Player extends Thread {
 
     public Player(Socket socket) {
         this.socket = new PlayerSocket(socket);
-        System.out.println("Player connected...");
         isConnected = true;
     }
 
     public void run(){
-        System.out.println("Player started...");
         try {
             this.socket.connect();
             loop : while(true){
@@ -25,12 +25,11 @@ public class Player extends Thread {
                 if (received != null) {
                     String tmp[] = received.split("#");
                     String command = tmp[0];
-                    if (command.equals("LOGIN")) {
+                    if (command.equals(Command.LOGIN.toString())) {
                         if (Server.getInstance().checkNameAvailability(tmp[1])) {
                             userName = tmp[1];
                             Server.getInstance().addName(tmp[1]);
                             sendToPlayer(Command.LOGIN_SUCCEED.toString());
-                            isConnected = true;
 
                             //send available games
                             for (Game game : Server.getInstance().getGames()) {
@@ -42,7 +41,7 @@ public class Player extends Thread {
                             sendToPlayer(Command.NAME_NOT_AVAILABLE.toString());
                         }
                     }
-                    else if (command.equals("CREATE_GAME")) {
+                    else if (command.equals(Command.CREATE_GAME.toString())) {
                         resetPlayer();
                         String name = tmp[1];
                         if(Server.getInstance().checkGameNameAvailability(name)) {
@@ -56,7 +55,7 @@ public class Player extends Thread {
                         }
                     }
 
-                    else if(command.equals("ABANDON_GAME")){
+                    else if(command.equals(Command.ABANDON_GAME.toString())){
                         if(this == game.getHost()){
                             Player guest = this.game.getGuest();
                             if (guest != null) {
@@ -83,7 +82,7 @@ public class Player extends Thread {
                         }
                     }
 
-                    else if (command.equals("DELETE_GAME")) {
+                    else if (command.equals(Command.DELETE_GAME.toString())) {
                         if (this == this.game.getHost()) {
                             Player guest = this.game.getGuest();
                             if (guest != null) {
@@ -95,7 +94,7 @@ public class Player extends Thread {
                             this.sendToPlayer(Command.GAME_DELETED.toString());
                         }
                     }
-                    else if (command.equals("JOIN_TO_GAME")) {
+                    else if (command.equals(Command.JOIN_TO_GAME.toString())) {
                         resetPlayer();
                         Game toJoin = Server.getInstance().findGame(tmp[1]);
                         if (toJoin != null) {
@@ -110,35 +109,34 @@ public class Player extends Thread {
                         }
                     }
 
-                    else if(command.equals("INVITATION")){
-                        Server.getInstance().printLog("Jestem w tum zaproszeniu");
+                    else if(command.equals(Command.INVITATION.toString())){
                         if(!this.game.isGameActive()) {
                             this.game.getOpponent(this).sendToPlayer(Command.INVITATION.toString());
                         }
                     }
 
-                    else if(command.equals("OFFER_ACCEPT")){
+                    else if(command.equals(Command.OFFER_ACCEPT.toString())){
                         if(!this.game.isGameActive()) {
                             this.game.startGame(this.game.getOpponent(this));
                         }
                     }
 
-                    else if(command.equals("OFFER_REJECT")){
+                    else if(command.equals(Command.OFFER_REJECT.toString())){
                         if(!this.game.isGameActive()) {
                             this.game.getOpponent(this).sendToPlayer(Command.OFFER_REJECT.toString());
                         }
                     }
 
-                    else if(command.equals("GIVE_UP")){
+                    else if(command.equals(Command.GIVE_UP.toString())){
                         this.game.exitGame(this);
                     }
 
-                    else if(command.equals("CHAT_MESSAGE")){
+                    else if(command.equals(Command.CHAT_MESSAGE.toString())){
                         Player opponent = this.game.getOpponent(this);
                         opponent.sendToPlayer(Command.CHAT_MESSAGE.toString() +"#"+tmp[1]);
                     }
 
-                    else if (command.equals("PLACE_A_SHIP")) {
+                    else if (command.equals(Command.PLACE_A_SHIP.toString())) {
                         try {
                             boolean vertical = Boolean.parseBoolean(tmp[1]);
                             int x = Integer.parseInt(tmp[2]);
@@ -150,7 +148,7 @@ public class Player extends Thread {
                         }
                     }
 
-                    else if(command.equals("REMOVE_SHIP")){
+                    else if(command.equals(Command.REMOVE_SHIP.toString())){
                         try {
                             int x = Integer.parseInt(tmp[1]);
                             int y = Integer.parseInt(tmp[2]);
@@ -160,22 +158,21 @@ public class Player extends Thread {
                         }
                     }
 
-                    else if(command.equals("READY")){
+                    else if(command.equals(Command.READY.toString())){
                         this.game.setReady(this);
                     }
 
-                    else if (command.equals("SHOOT")) {
+                    else if (command.equals(Command.SHOOT.toString())) {
                         try {
                             int x = Integer.parseInt(tmp[1]);
                             int y = Integer.parseInt(tmp[2]);
-                            Server.getInstance().printLog(x +","+y);
                             this.game.shoot(this, x, y);
                         } catch (NumberFormatException e) {
                             e.printStackTrace();
                         }
                     }
 
-                    else if(command.equals("CLIENT_CLOSE")){
+                    else if(command.equals(Command.CLIENT_CLOSE.toString())){
                         this.isConnected = false;
                         if(this.game != null) {
                             if (this == game.getHost()) {
@@ -197,20 +194,18 @@ public class Player extends Thread {
                         }
                         break loop;
                     }
+                    else if (command.equals(Command.SERVER_SHUTDOWN.toString())){
+                        break loop;
+                    }
                 }
             }
         } catch (Exception e) {
             this.isConnected = false;
         } finally {
             this.socket.close();
-            Server.getInstance().printLog("Jestem tutaj");
             Server.getInstance().deleteName(this.userName);
             Server.getInstance().deletePlayer(this);
         }
-    }
-
-    public String getUserName() {
-        return userName;
     }
 
     public void sendToPlayer(String msg) { this.socket.sendMessage(msg);}

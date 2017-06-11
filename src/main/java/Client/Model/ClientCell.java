@@ -1,4 +1,4 @@
-package main.java.Client;
+package main.java.Client.Model;
 
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -19,11 +19,6 @@ public class ClientCell extends Rectangle {
         return this.wasUsed;
     }
 
-    public void setColors(Color fill,Color stroke){
-        this.setFill(fill);
-        this.setStroke(stroke);
-    }
-
     public void setColorAndUsed(Color fill){
         this.setFill(fill);
         this.wasUsed = true;
@@ -42,7 +37,4 @@ public class ClientCell extends Rectangle {
         return position.getY();
     }
 
-    public void setWasUsed(boolean wasUsed) {
-        this.wasUsed = wasUsed;
-    }
 }

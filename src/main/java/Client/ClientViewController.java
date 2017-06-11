@@ -14,6 +14,10 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import main.java.Client.Model.ClientCell;
+import main.java.Client.Model.ClientSocket;
+import main.java.Client.Model.EnemyBoard;
+import main.java.Client.Model.PlayerBoard;
 import main.java.Utils.Command;
 import main.java.Utils.Package;
 
@@ -191,9 +195,7 @@ public class ClientViewController implements Initializable {
             if(cell.wasUsed()){
                 return;
             }
-            System.out.println(cell.getXCoordinate()+" "+cell.getYCoordinate());
             Package pack = new Package(Command.SHOOT.toString(),cell.getXCoordinate(),cell.getYCoordinate());
-            System.out.println(pack.toString());
             this.clientSocket.sendMessage(pack.toString());
         });
         this.VBoxMy.getChildren().add(myBoard);
@@ -214,7 +216,6 @@ public class ClientViewController implements Initializable {
                                 Toggle old_toggle, Toggle new_toggle) {
                 if (sizeGroup.getSelectedToggle() != null) {
                     int size = (int)sizeGroup.getSelectedToggle().getUserData();
-                    System.out.println("Aktualny rozmiar : "+ size);
                     myBoard.setCurrentPlacingSize(size);
                 }
             }
@@ -225,11 +226,9 @@ public class ClientViewController implements Initializable {
         this.removeShip.setOnMouseClicked(event -> {
             if(this.removeShip.isSelected()) {
                 this.removing = true;
-                System.out.println("true");
             }
             else {
                 removing = false;
-                System.out.println(false);
             }
         });
     }
@@ -324,7 +323,6 @@ public class ClientViewController implements Initializable {
         else{
             String tmp = this.gamesCombo.getSelectionModel().getSelectedItem();
             Package pack = new Package(Command.JOIN_TO_GAME.toString(),tmp);
-            System.out.println(pack.toString());
             this.clientSocket.sendMessage(pack.toString());
         }
     }
@@ -462,6 +460,10 @@ public class ClientViewController implements Initializable {
     //Observable lists methods
 
     public void addGameToList(String gameInfo){
+        if (this.gameList.contains(gameInfo)){
+            this.infoArea.clear();
+            return;
+        }
         this.gameList.add(gameInfo);
     }
     public void removeGameFromList(String gameInfo){
@@ -539,6 +541,17 @@ public class ClientViewController implements Initializable {
         infoArea.setText(info);
     }
 
+    public void serverShutdown(){
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Zamknięcie serwera");
+        alert.setHeaderText(null);
+        alert.setContentText("Serwer przysłał sygnał o zamknięciu. Działanie aplikacji zostanie przerwane");
+        alert.showAndWait();
+        this.clientSocket.sendMessage(Command.SERVER_SHUTDOWN.toString());
+        this.gameService.cancel();
+        this.clientSocket.close();
+        System.exit(0);
+    }
 
     public void offerReceived(){
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);

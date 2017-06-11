@@ -1,8 +1,5 @@
 package main.java.Utils;
 
-/**
- * Created by Jakub on 2017-05-20.
- */
 public class Point {
     private final int x;
     private final int y;

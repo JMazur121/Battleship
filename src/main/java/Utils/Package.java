@@ -1,8 +1,5 @@
 package main.java.Utils;
 
-/**
- * Created by Jakub on 2017-05-23.
- */
 public class Package {
     private String command;
     private String additional=null;

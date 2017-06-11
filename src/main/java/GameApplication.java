@@ -1,4 +1,4 @@
-package main.java.Client;
+package main.java;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -8,7 +8,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-public class ClientApplication extends Application {
+public class GameApplication extends Application {
 
     public static void main(String[] args) {
         launch(args);
@@ -16,7 +16,7 @@ public class ClientApplication extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/src/main/resources/LoginWindow.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/src/main/resources/AppView.fxml"));
         primaryStage.setTitle("Statki");
         primaryStage.setScene(new Scene(root));
         primaryStage.show();

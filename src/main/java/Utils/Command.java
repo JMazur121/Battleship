@@ -1,8 +1,5 @@
 package main.java.Utils;
 
-/**
- * Created by Jakub on 2017-05-23.
- */
 public enum Command {
     LOGIN,
     LOGIN_SUCCEED,
@@ -52,5 +49,6 @@ public enum Command {
     HIT_AND_SINK,
     PLAYER_HINT,
     CHAT_MESSAGE,
-    CLIENT_CLOSE
+    CLIENT_CLOSE,
+    SERVER_SHUTDOWN
 }

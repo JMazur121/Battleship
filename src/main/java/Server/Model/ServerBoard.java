@@ -1,4 +1,4 @@
-package main.java.Server;
+package main.java.Server.Model;
 
 import main.java.Utils.Point;
 
@@ -12,14 +12,6 @@ public class ServerBoard {
 
     public ServerBoard(){
         initializeBoard();
-    }
-
-    public int getUnitsLeft() {
-        return unitsLeft;
-    }
-
-    public void setUnitsLeft(int unitsLeft) {
-        this.unitsLeft = unitsLeft;
     }
 
     public void initializeBoard() {
@@ -146,12 +138,12 @@ public class ServerBoard {
     }
 
     public boolean checkIfMissed(int x,int y) {
-        return !getCell(x,y).isShip();
+        return (!(getCell(x,y).isShip()));
     }
 
     public boolean destroyShip(){
         this.unitsLeft--;
-        return !(this.unitsLeft > 0);
+        return (!(this.unitsLeft > 0));
     }
 
     public boolean placeShip(Ship shipToPlace, int x, int y){
@@ -188,5 +180,4 @@ public class ServerBoard {
         }
         return ship;
     }
-
 }

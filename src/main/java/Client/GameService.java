@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.scene.paint.Color;
+import main.java.Client.Model.ClientSocket;
 import main.java.Utils.Command;
 
 public class GameService extends Service<Void> {
@@ -35,7 +36,7 @@ public class GameService extends Service<Void> {
             @Override
             protected Void call() {
                 try {
-                    while (true) {
+                    loop : while (true) {
                         String received = clientSocket.receiveMessage();
                         if (received != null) {
                             String tmp[] = received.split("#");
@@ -293,7 +294,8 @@ public class GameService extends Service<Void> {
                                 });
                             } else if (command.equals(Command.PLAYER_HINT.toString())) {
                                 Platform.runLater(() -> {
-                                    viewController.enemyBoard.paintHintAfterKill(Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3]), Boolean.parseBoolean(tmp[4]));
+                                    //viewController.enemyBoard.paintHintAfterKill(Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3]), Boolean.parseBoolean(tmp[4]));
+                                    viewController.enemyBoard.paintHintAfterKill(Integer.parseInt(tmp[2]),Integer.parseInt(tmp[3]),Integer.parseInt(tmp[4]),Boolean.parseBoolean(tmp[1]));
                                 });
                             } else if (command.equals(Command.YOU_WIN.toString())) {
                                 Platform.runLater(() -> {
@@ -315,6 +317,11 @@ public class GameService extends Service<Void> {
                                     viewController.putInfo("Nadeszła wiadomośc");
                                     viewController.chatReceived(tmp[1]);
                                 });
+                            } else if (command.equals(Command.SERVER_SHUTDOWN.toString())){
+                                Platform.runLater(()->{
+                                    viewController.serverShutdown();
+                                });
+                                break loop;
                             }
                         }
                     }

@@ -15,9 +15,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-/**
- * Created by Jakub on 2017-05-27.
- */
 public class LoginWindowController implements Initializable{
     @FXML
     private TextField fieldAdres;
@@ -70,7 +67,6 @@ public class LoginWindowController implements Initializable{
             alert.setHeaderText(null);
             alert.setContentText("Nie udało się nawiązać połącznenia z serwerem. Sprawdź poprawność danych i spróbuj ponownie później");
             alert.showAndWait();
-            //System.exit(1);
         }
     }
 

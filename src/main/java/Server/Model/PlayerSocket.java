@@ -1,4 +1,4 @@
-package main.java.Server;
+package main.java.Server.Model;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,9 +6,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-/**
- * Created by Jakub on 2017-06-03.
- */
 public class PlayerSocket {
     private Socket socket;
     private BufferedReader in;
