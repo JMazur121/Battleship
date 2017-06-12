@@ -1,6 +1,6 @@
-package main.java.Server.Model;
+package Server.Model;
 
-import main.java.Utils.Point;
+import Utils.Point;
 
 public class Ship {
     private final int length;

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id="Desktop" external.linked.project.path="$USER_HOME$/Desktop" external.root.project.path="$USER_HOME$/Desktop" external.system.id="GRADLE" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$USER_HOME$/Desktop" />
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

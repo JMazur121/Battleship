@@ -1,4 +1,4 @@
-package main.java.Client.Model;
+package Client.Model;
 
 import java.io.BufferedReader;
 import java.io.IOException;

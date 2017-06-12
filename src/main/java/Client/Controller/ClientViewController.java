@@ -1,4 +1,4 @@
-package main.java.Client;
+package Client.Controller;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -14,12 +14,12 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import main.java.Client.Model.ClientCell;
-import main.java.Client.Model.ClientSocket;
-import main.java.Client.Model.EnemyBoard;
-import main.java.Client.Model.PlayerBoard;
-import main.java.Utils.Command;
-import main.java.Utils.Package;
+import Client.Model.ClientCell;
+import Client.Model.ClientSocket;
+import Client.Model.EnemyBoard;
+import Client.Model.PlayerBoard;
+import Utils.Command;
+import Utils.Package;
 
 import java.net.URL;
 import java.time.LocalTime;

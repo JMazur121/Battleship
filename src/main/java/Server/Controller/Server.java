@@ -1,8 +1,8 @@
-package main.java.Server;
+package Server.Controller;
 
 import javafx.application.Platform;
-import main.java.Server.Model.Game;
-import main.java.Utils.Command;
+import Server.Model.Game;
+import Utils.Command;
 
 import java.io.IOException;
 import java.net.ServerSocket;

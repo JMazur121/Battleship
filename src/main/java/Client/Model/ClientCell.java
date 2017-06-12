@@ -1,8 +1,9 @@
-package main.java.Client.Model;
+package Client.Model;
 
+import Utils.Point;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import main.java.Utils.Point;
+
 
 public class ClientCell extends Rectangle {
     private final Point position;

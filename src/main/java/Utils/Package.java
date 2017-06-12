@@ -1,4 +1,4 @@
-package main.java.Utils;
+package Utils;
 
 public class Package {
     private String command;

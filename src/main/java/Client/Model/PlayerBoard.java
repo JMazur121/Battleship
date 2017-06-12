@@ -1,5 +1,6 @@
-package main.java.Client.Model;
+package Client.Model;
 
+import Client.Controller.ClientViewController;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
@@ -8,7 +9,6 @@ import javafx.event.EventHandler;
 import javafx.scene.control.RadioButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import main.java.Client.ClientViewController;
 
 public class PlayerBoard extends Board {
     private int currentPlacingSize = 4;

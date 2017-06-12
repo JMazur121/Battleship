@@ -1,8 +1,8 @@
-package main.java.Server;
+package Server.Controller;
 
-import main.java.Server.Model.Game;
-import main.java.Server.Model.PlayerSocket;
-import main.java.Utils.Command;
+import Server.Model.Game;
+import Server.Model.PlayerSocket;
+import Utils.Command;
 
 import java.net.Socket;
 

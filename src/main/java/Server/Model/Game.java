@@ -1,9 +1,9 @@
-package main.java.Server.Model;
+package Server.Model;
 
-import main.java.Server.Player;
-import main.java.Utils.Command;
-import main.java.Utils.Package;
-import main.java.Utils.Point;
+import Server.Controller.Player;
+import Utils.Command;
+import Utils.Package;
+import Utils.Point;
 
 public class Game {
     private String gameName;

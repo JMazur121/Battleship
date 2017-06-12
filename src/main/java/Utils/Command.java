@@ -1,4 +1,4 @@
-package main.java.Utils;
+package Utils;
 
 public enum Command {
     LOGIN,

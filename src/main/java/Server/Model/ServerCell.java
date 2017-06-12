@@ -1,4 +1,4 @@
-package main.java.Server.Model;
+package Server.Model;
 
 public class ServerCell {
     private Ship ship = null;

@@ -1,5 +1,3 @@
-package main.java;
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -26,7 +24,7 @@ public class AppController implements Initializable {
     private void loadServer(ActionEvent event) throws IOException {
         Stage stage;
         stage = (Stage) this.servButton.getScene().getWindow();
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/src/main/resources/ServerView.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/ServerView.fxml"));
         Parent root = (Parent) loader.load();
         Scene scene = new Scene(root);
         stage.setScene(scene);
@@ -38,7 +36,7 @@ public class AppController implements Initializable {
     private void loadClient(ActionEvent event) throws IOException {
         Stage stage;
         stage = (Stage) this.clientButton.getScene().getWindow();
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/src/main/resources/LoginWindow.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/LoginWindow.fxml"));
         Parent root = (Parent) loader.load();
         Scene scene = new Scene(root);
         stage.setScene(scene);

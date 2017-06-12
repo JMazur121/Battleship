@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="GradleSettings">
-    <option name="gradleHome" value="C:/Program Files (x86)/Gradle/gradle-1.0-rc-3" />
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="distributionType" value="LOCAL" />
+        <option name="externalProjectPath" value="$USER_HOME$/Desktop" />
+        <option name="gradleHome" value="E:/Gradle/gradle-3.5" />
+        <option name="modules">
+          <set>
+            <option value="$USER_HOME$/Desktop" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
   </component>
 </project>
-
